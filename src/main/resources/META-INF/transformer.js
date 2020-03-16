@@ -105,19 +105,19 @@ function initializeCoreMod() {
             }
         },
 
-        // make it possible for items to be fireproof
-        'entity_patch': {
+        // make it possible to change tool harvest level
+        'item_patch': {
             'target': {
                 'type': 'CLASS',
-                'name': 'net.minecraft.entity.Entity'
+                'name': 'net.minecraft.item.Item'
             },
             'transformer': function(classNode) {
                 patchMethod([{
                     obfName: "",
-                    name: "isImmuneToFire",
-                    desc: "()Z",
-                    patches: [patchEntityIsImmuneToFire]
-                }], classNode, "Entity");
+                    name: "getHarvestLevel",
+                    desc: "(Lnet/minecraft/item/ItemStack;Lnet/minecraftforge/common/ToolType;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/block/BlockState;)I",
+                    patches: [patchItemGetHarvestLevel]
+                }], classNode, "Item");
                 return classNode;
             }
         }
@@ -180,7 +180,7 @@ function patchInstructions(method, filter, action, obfuscated) {
     }
 }
 
-var patchEntityIsImmuneToFire = {
+var patchItemGetHarvestLevel = {
     filter: function(node, obfuscated) {
         if (node instanceof InsnNode && node.getOpcode().equals(Opcodes.IRETURN)) {
             return node.getPrevious();
@@ -189,7 +189,7 @@ var patchEntityIsImmuneToFire = {
     action: function(node, instructions, obfuscated) {
         var insnList = new InsnList();
         insnList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        insnList.add(generateHook("isItemFireproof", "(ZLnet/minecraft/entity/Entity;)Z"));
+        insnList.add(generateHook("getHarvestLevel", "(ILnet/minecraft/item/Item;)I"));
         instructions.insert(node, insnList);
     }
 };

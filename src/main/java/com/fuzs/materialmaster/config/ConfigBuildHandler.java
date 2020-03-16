@@ -64,7 +64,7 @@ public class ConfigBuildHandler {
         BUILDER.push("property_item_stats");
         STACK_SIZE = ConfigBuildHandler.BUILDER.comment("Specify the max stack size for any item. Value has to be between 0 and 64.").define("Stack Size List", Lists.newArrayList());
         DURABILITY = ConfigBuildHandler.BUILDER.comment("Change the durability for any damageable item. Setting it to 0 will make the item unbreakable.").define("Durability List", Lists.newArrayList());
-        DIG_SPEED = ConfigBuildHandler.BUILDER.comment("Change the dig speed value for any item. Setting it to 0 will make it impossible to enchant the item.").define("Dig Speed List", Lists.newArrayList());
+        DIG_SPEED = ConfigBuildHandler.BUILDER.comment("Change the dig speed value for any item. Setting it to 0 will make it impossible to enchant the item.\nThis is a fun little test.\nNow we wait").define("Dig Speed List", Lists.newArrayList());
         HARVEST_LEVEL = ConfigBuildHandler.BUILDER.comment("Change the harvest level value for any tool item. Setting it to 0 will make it impossible to enchant the item.").define("Harvest Level List", Lists.newArrayList());
         ENCHANTABILITY = ConfigBuildHandler.BUILDER.comment("Change the enchantability value for any enchantable item. Setting the value to 0 will make enchanting this item impossible.").define("Enchantability List", Lists.newArrayList());
         BUILDER.pop();

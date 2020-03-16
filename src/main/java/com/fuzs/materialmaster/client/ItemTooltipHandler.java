@@ -1,9 +1,8 @@
 package com.fuzs.materialmaster.client;
 
-import com.fuzs.materialmaster.property.AttributeStringListBuilder;
+import com.fuzs.materialmaster.core.PropertySyncManager;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -21,12 +20,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 public class ItemTooltipHandler {
-
-    private static final Set<UUID> KNOWN_ATTRIBUTE_IDS = getKnownAttributeIds();
 
     @SuppressWarnings({"unused", "ConstantConditions"})
     @SubscribeEvent
@@ -93,7 +88,7 @@ public class ItemTooltipHandler {
 
                     AttributeModifier attributemodifier = entry.getValue();
                     double amount = attributemodifier.getAmount();
-                    if (equipmentslottype == EquipmentSlotType.MAINHAND && player != null && KNOWN_ATTRIBUTE_IDS.contains(attributemodifier.getID())) {
+                    if (equipmentslottype == EquipmentSlotType.MAINHAND && player != null && PropertySyncManager.getInstance().isKnownAttributeId(attributemodifier.getID())) {
 
                         // collect known attributes in separate map for adding later collectively
                         stats.merge(entry.getKey(), amount, Double::sum);
@@ -136,18 +131,6 @@ public class ItemTooltipHandler {
                 }
             }
         }
-    }
-
-    private static Set<UUID> getKnownAttributeIds() {
-
-        Set<UUID> ids = Sets.newHashSet(AttributeStringListBuilder.ARMOR_MODIFIERS);
-        ids.add(AttributeStringListBuilder.MAINHAND_MODIFIER);
-        // vanilla item attack damage modifier
-        ids.add(UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF"));
-        // vanilla item attack speed modifier
-        ids.add(UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3"));
-
-        return ids;
     }
 
 }

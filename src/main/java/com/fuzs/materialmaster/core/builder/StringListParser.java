@@ -1,4 +1,4 @@
-package com.fuzs.materialmaster.property;
+package com.fuzs.materialmaster.core.builder;
 
 import com.fuzs.materialmaster.MaterialMaster;
 import net.minecraft.util.ResourceLocation;
@@ -20,7 +20,7 @@ public class StringListParser<T extends IForgeRegistryEntry<T>> {
 
     protected final void logStringParsingError(String entry, String message) {
         
-        MaterialMaster.LOGGER.error("Unable to parse entry \"" + entry + "\": " + message);
+        MaterialMaster.LOGGER.warn("Unable to parse entry \"" + entry + "\": " + message);
     }
 
     protected final Optional<ResourceLocation> parseResourceLocation(String source) {

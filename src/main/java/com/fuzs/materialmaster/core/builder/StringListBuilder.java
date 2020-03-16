@@ -1,4 +1,4 @@
-package com.fuzs.materialmaster.property;
+package com.fuzs.materialmaster.core.builder;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;

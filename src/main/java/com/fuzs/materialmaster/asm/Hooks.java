@@ -1,9 +1,11 @@
 package com.fuzs.materialmaster.asm;
 
 import com.fuzs.materialmaster.common.RegisterAttributeHandler;
-import com.fuzs.materialmaster.property.PropertySyncManager;
+import com.fuzs.materialmaster.core.PropertySyncManager;
+import com.fuzs.materialmaster.core.property.AttributeItemProperty;
+import com.fuzs.materialmaster.core.property.SimpleItemProperty;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
@@ -18,8 +20,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.Map;
-
 @SuppressWarnings("unused")
 public class Hooks {
 
@@ -29,14 +29,10 @@ public class Hooks {
      */
     public static Multimap<String, AttributeModifier> adjustAttributeMap(Multimap<String, AttributeModifier> multimap, EquipmentSlotType equipmentSlot, ItemStack stack) {
 
-        Map<Item, Map<String, AttributeModifier>> itemMap = PropertySyncManager.attributeMap;
-        if (itemMap != null && (!(stack.getItem() instanceof ArmorItem) && equipmentSlot == EquipmentSlotType.MAINHAND || stack.getItem() instanceof ArmorItem && ((ArmorItem) stack.getItem()).getEquipmentSlot() == equipmentSlot)) {
+        // handle armor differently
+        if ((!(stack.getItem() instanceof ArmorItem) && equipmentSlot == EquipmentSlotType.MAINHAND || stack.getItem() instanceof ArmorItem && ((ArmorItem) stack.getItem()).getEquipmentSlot() == equipmentSlot)) {
 
-            Map<String, AttributeModifier> attributeMap = itemMap.get(stack.getItem());
-            if (attributeMap != null) {
-
-                multimap.putAll(Multimaps.forMap(attributeMap));
-            }
+            multimap.putAll(((AttributeItemProperty) PropertySyncManager.getInstance().getProperty("attributes")).getValue(stack.getItem(), HashMultimap.create()));
         }
 
         return multimap;
@@ -98,11 +94,17 @@ public class Hooks {
         return (int) Math.ceil(player.getAttribute(SharedMonsterAttributes.ATTACK_KNOCKBACK).getValue());
     }
 
-    public static int getItemEnchantability(int i, ItemStack stack) {
+    /**
+     * don't add a harvest level if it had not been present before
+     */
+    public static int getHarvestLevel(int toolLevel, Item item) {
 
-        int enchantability = PropertySyncManager.enchantabilityMap != null ? PropertySyncManager.enchantabilityMap.getOrDefault(stack.getItem(),
-                -1.0).intValue() : -1;
-        return enchantability != -1 ? enchantability : i;
+        return toolLevel != -1 ? ((SimpleItemProperty) PropertySyncManager.getInstance().getProperty("harvest_level")).getValue(item, (double) toolLevel).intValue() : toolLevel;
+    }
+
+    public static int getItemEnchantability(int enchantability, ItemStack stack) {
+
+        return ((SimpleItemProperty) PropertySyncManager.getInstance().getProperty("enchantability")).getValue(stack.getItem(), (double) enchantability).intValue();
     }
 
 }
