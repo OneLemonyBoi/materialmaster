@@ -1,7 +1,8 @@
 package com.fuzs.materialmaster.core.provider;
 
-import com.fuzs.materialmaster.core.builder.AttributeMapBuilder;
-import com.google.common.collect.*;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.item.Item;
 
@@ -10,18 +11,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public abstract class AbstractPropertyProvider {
-
-    private AttributeMapBuilder attributeBuilder;
-
-    protected final AttributeMapBuilder getAttributeBuilder() {
-
-        if (this.attributeBuilder == null) {
-
-            this.attributeBuilder = new AttributeMapBuilder(this.getMainhandModifierId(), this.getArmorModifierIds());
-        }
-
-        return this.attributeBuilder;
-    }
 
     public abstract boolean isEnabled();
 

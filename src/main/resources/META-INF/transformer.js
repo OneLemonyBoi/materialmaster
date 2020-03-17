@@ -57,7 +57,7 @@ function initializeCoreMod() {
             },
             'transformer': function(classNode) {
                 patchMethod([{
-                    obfName: "?",
+                    obfName: "func_147340_a",
                     name: "processUseEntity",
                     desc: "(Lnet/minecraft/network/play/client/CUseEntityPacket;)V",
                     patches: [patchServerPlayNetHandlerProcessUseEntity]
@@ -91,12 +91,12 @@ function initializeCoreMod() {
             },
             'transformer': function(classNode) {
                 patchMethod([{
-                    obfName: "",
+                    obfName: "func_77514_a",
                     name: "calcItemStackEnchantability",
                     desc: "(Ljava/util/Random;IILnet/minecraft/item/ItemStack;)I",
                     patches: [patchEnchantmentHelperCalcItemStackEnchantability]
                 }, {
-                    obfName: "",
+                    obfName: "func_77513_b",
                     name: "buildEnchantmentList",
                     desc: "(Ljava/util/Random;Lnet/minecraft/item/ItemStack;IZ)Ljava/util/List;",
                     patches: [patchEnchantmentHelperBuildEnchantmentList]
@@ -113,7 +113,7 @@ function initializeCoreMod() {
             },
             'transformer': function(classNode) {
                 patchMethod([{
-                    obfName: "",
+                    obfName: "getHarvestLevel",
                     name: "getHarvestLevel",
                     desc: "(Lnet/minecraft/item/ItemStack;Lnet/minecraftforge/common/ToolType;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/block/BlockState;)I",
                     patches: [patchItemGetHarvestLevel]
@@ -236,7 +236,7 @@ var patchPlayerEntityAttackTargetEntityWithCurrentItem = {
             var nextNode = node.getNext();
             if (nextNode instanceof VarInsnNode && nextNode.getOpcode().equals(Opcodes.ISTORE) && nextNode.var.equals(7)) {
                 nextNode = getNthNode(node, 6);
-                if (matchesMethod(nextNode, "net/minecraft/enchantment/EnchantmentHelper", obfuscated ? "" : "getKnockbackModifier", "(Lnet/minecraft/entity/LivingEntity;)I")) {
+                if (matchesMethod(nextNode, "net/minecraft/enchantment/EnchantmentHelper", obfuscated ? "func_77501_a" : "getKnockbackModifier", "(Lnet/minecraft/entity/LivingEntity;)I")) {
                     return node;
                 }
             }
@@ -255,7 +255,7 @@ var patchServerPlayNetHandlerProcessUseEntity = {
     filter: function(node, obfuscated) {
         if (node instanceof VarInsnNode && node.getOpcode().equals(Opcodes.DLOAD) && node.var.equals(5)) {
             var nextNode = node.getPrevious();
-            if (matchesMethod(nextNode, "net/minecraft/entity/player/ServerPlayerEntity", obfuscated ? "" : "getDistanceSq", "(Lnet/minecraft/entity/Entity;)D")) {
+            if (matchesMethod(nextNode, "net/minecraft/entity/player/ServerPlayerEntity", obfuscated ? "func_70068_e" : "getDistanceSq", "(Lnet/minecraft/entity/Entity;)D")) {
                 return node;
             }
         }
@@ -264,7 +264,7 @@ var patchServerPlayNetHandlerProcessUseEntity = {
         var insnList = new InsnList();
         insnList.add(new InsnNode(Opcodes.POP2));
         insnList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        insnList.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/network/play/ServerPlayNetHandler", obfuscated ? "" : "player", "Lnet/minecraft/entity/player/ServerPlayerEntity;"));
+        insnList.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/network/play/ServerPlayNetHandler", obfuscated ? "field_147369_b" : "player", "Lnet/minecraft/entity/player/ServerPlayerEntity;"));
         insnList.add(new VarInsnNode(Opcodes.ALOAD, 3));
         insnList.add(generateHook("getEntityReachDistance", "(Lnet/minecraft/entity/player/ServerPlayerEntity;Lnet/minecraft/entity/Entity;)D"));
         instructions.insert(node, insnList);
@@ -298,7 +298,7 @@ var patchGameRendererGetMouseOver2 = {
             var nextNode = node.getNext();
             if (nextNode instanceof InsnNode && nextNode.getOpcode().equals(Opcodes.FCONST_1)) {
                 nextNode = nextNode.getNext();
-                if (matchesMethod(nextNode, "net/minecraft/entity/Entity", obfuscated ? "" : "getLook", "(F)Lnet/minecraft/util/math/Vec3d;")) {
+                if (matchesMethod(nextNode, "net/minecraft/entity/Entity", obfuscated ? "func_70676_i" : "getLook", "(F)Lnet/minecraft/util/math/Vec3d;")) {
                     return node;
                 }
             }

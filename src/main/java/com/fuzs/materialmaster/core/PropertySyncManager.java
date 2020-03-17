@@ -25,13 +25,13 @@ public class PropertySyncManager {
 
     private final List<AbstractPropertyProvider> providers = Lists.newArrayList();
     private final Map<String, ItemProperty<?>> properties = Maps.newHashMap();
-    private final ConfigPropertyProvider configProperties = new ConfigPropertyProvider();
+    private final ConfigPropertyProvider defaultProperties = new ConfigPropertyProvider();
     private final Set<UUID> knownAttributeIds = Sets.newHashSet();
 
     private PropertySyncManager() {
 
         this.properties.put("attributes", new AttributeItemProperty("Attributes", AbstractPropertyProvider::getAttributes));
-        this.properties.put("stack_size", new SimpleItemProperty("Stack Size", AbstractPropertyProvider::getStackSize, 0.0, 64.0));
+        this.properties.put("stack_size", new SimpleItemProperty("Stack Size", AbstractPropertyProvider::getStackSize, 0.0, 64.0, item -> !item.isDamageable(), "Has durability"));
         this.properties.put("durability", new SimpleItemProperty("Durability", AbstractPropertyProvider::getDurability, Item::isDamageable, "Not damageable"));
         this.properties.put("dig_speed", new SimpleItemProperty("Dig Speed", AbstractPropertyProvider::getDigSpeed));
         this.properties.put("harvest_level", new SimpleItemProperty("Harvest Level", AbstractPropertyProvider::getHarvestLevel, item -> !item.getToolTypes(null).isEmpty(), "No tool"));
@@ -57,7 +57,7 @@ public class PropertySyncManager {
     private List<AbstractPropertyProvider> getProviders() {
 
         List<AbstractPropertyProvider> providers = this.providers.stream().filter(AbstractPropertyProvider::isEnabled).collect(Collectors.toList());
-        providers.add(this.configProperties);
+        providers.add(this.defaultProperties);
 
         return providers;
     }

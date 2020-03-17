@@ -1,8 +1,8 @@
 package com.fuzs.materialmaster.core.provider;
 
+import com.fuzs.materialmaster.core.builder.AttributeMapBuilder;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -25,10 +25,31 @@ public class CombatPropertyProvider extends AbstractPropertyProvider {
     @Override
     public Map<Item, Multimap<String, AttributeModifier>> getAttributes() {
 
-        Map<Item, Multimap<String, AttributeModifier>> attributes = Maps.newHashMap();
-        this.getAttributeBuilder().putAttackDamage(attributes, Items.DIAMOND_AXE, -1.0);
-
-        return attributes;
+        return AttributeMapBuilder.create(this.getMainhandModifierId(), this.getArmorModifierIds())
+                .putAttackDamage(Items.DIAMOND_SWORD, 1.0)
+                .putAttackDamage(Items.DIAMOND_AXE, -2.0)
+                .putAttackDamage(Items.DIAMOND_PICKAXE, 1.0)
+                .putAttackDamage(Items.DIAMOND_SHOVEL, -0.5)
+                .putAttackDamage(Items.DIAMOND_HOE, 3.0)
+                .putAttackDamage(Items.IRON_SWORD, 1.0)
+                .putAttackDamage(Items.IRON_AXE, -3.0)
+                .putAttackDamage(Items.IRON_PICKAXE, 1.0)
+                .putAttackDamage(Items.IRON_SHOVEL, -0.5)
+                .putAttackDamage(Items.IRON_HOE, 2.0)
+                .putAttackDamage(Items.STONE_SWORD, 1.0)
+                .putAttackDamage(Items.STONE_AXE, -4.0)
+                .putAttackDamage(Items.STONE_PICKAXE, 1.0)
+                .putAttackDamage(Items.STONE_SHOVEL, -0.5)
+                .putAttackDamage(Items.STONE_HOE, 1.0)
+                .putAttackDamage(Items.WOODEN_SWORD, 1.0)
+                .putAttackDamage(Items.WOODEN_AXE, -3.0)
+                .putAttackDamage(Items.WOODEN_PICKAXE, 1.0)
+                .putAttackDamage(Items.WOODEN_SHOVEL, -0.5)
+                .putAttackDamage(Items.GOLDEN_SWORD, 1.0)
+                .putAttackDamage(Items.GOLDEN_AXE, -3.0)
+                .putAttackDamage(Items.GOLDEN_PICKAXE, 1.0)
+                .putAttackDamage(Items.GOLDEN_SHOVEL, -0.5)
+                .build();
     }
 
     @Override

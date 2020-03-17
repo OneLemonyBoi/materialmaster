@@ -3,6 +3,7 @@ package com.fuzs.materialmaster.core.builder;
 import com.fuzs.materialmaster.MaterialMaster;
 import com.fuzs.materialmaster.common.RegisterAttributeHandler;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -13,12 +14,15 @@ import net.minecraft.item.Item;
 import java.util.Map;
 import java.util.UUID;
 
+@SuppressWarnings("UnusedReturnValue")
 public class AttributeMapBuilder {
+
+    private final Map<Item, Multimap<String, AttributeModifier>> attributes = Maps.newHashMap();
 
     private final UUID mainhandModifierId;
     private final UUID[] armorModifierIds;
 
-    public AttributeMapBuilder(UUID mainhand, UUID[] armor) {
+    private AttributeMapBuilder(UUID mainhand, UUID[] armor) {
 
         this.mainhandModifierId = mainhand;
         this.armorModifierIds = armor;
@@ -28,68 +32,79 @@ public class AttributeMapBuilder {
 
         return new AttributeMapBuilder(mainhand, armor);
     }
-
-    public void putMultimapMap(Map<Item, Multimap<String, AttributeModifier>> origin, Map<Item, Map.Entry<String, AttributeModifier>> merge) {
-
-        merge.forEach((item, entry) -> this.putMultimapMap(origin, item, entry.getKey(), entry.getValue()));
+    
+    public Map<Item, Multimap<String, AttributeModifier>> build() {
+        
+        return this.attributes;
     }
 
-    private void putMultimapMap(Map<Item, Multimap<String, AttributeModifier>> origin, Item item, String attribute, AttributeModifier modifier) {
+    private void putMultimapMap(Item item, String attribute, AttributeModifier modifier) {
 
+        // build
         HashMultimap<String, AttributeModifier> multimap = HashMultimap.create();
         multimap.put(attribute, modifier);
-        origin.merge(item, multimap, (map1, map2) -> {
+
+        // combine
+        this.attributes.merge(item, multimap, (map1, map2) -> {
 
             map1.putAll(map2);
             return map1;
         });
     }
 
-    public void putMultimapMap(Map<Item, Multimap<String, AttributeModifier>> origin, Item item, String attribute, Double value) {
+    private void putMultimapMap(Item item, String attribute, Double value) {
 
         UUID id = item instanceof ArmorItem ? this.armorModifierIds[((ArmorItem) item).getEquipmentSlot().getIndex()] : this.mainhandModifierId;
         AttributeModifier modifier = new AttributeModifier(id, MaterialMaster.NAME + " modifier", value, AttributeModifier.Operation.ADDITION);
-        this.putMultimapMap(origin, item, attribute, modifier);
+        this.putMultimapMap(item, attribute, modifier);
     }
 
-    public void putKnockbackResistance(Map<Item, Multimap<String, AttributeModifier>> origin, Item item, Double value) {
+    public AttributeMapBuilder putKnockbackResistance(Item item, Double value) {
 
-        this.putMultimapMap(origin, item, SharedMonsterAttributes.KNOCKBACK_RESISTANCE.getName(), value);
+        this.putMultimapMap(item, SharedMonsterAttributes.KNOCKBACK_RESISTANCE.getName(), value);
+        return this;
     }
 
-    public void putAttackDamage(Map<Item, Multimap<String, AttributeModifier>> origin, Item item, Double value) {
+    public AttributeMapBuilder putAttackDamage(Item item, Double value) {
 
-        this.putMultimapMap(origin, item, SharedMonsterAttributes.ATTACK_DAMAGE.getName(), value);
+        this.putMultimapMap(item, SharedMonsterAttributes.ATTACK_DAMAGE.getName(), value);
+        return this;
     }
 
-    public void putAttackKnockback(Map<Item, Multimap<String, AttributeModifier>> origin, Item item, Double value) {
+    public AttributeMapBuilder putAttackKnockback(Item item, Double value) {
 
-        this.putMultimapMap(origin, item, SharedMonsterAttributes.ATTACK_KNOCKBACK.getName(), value);
+        this.putMultimapMap(item, SharedMonsterAttributes.ATTACK_KNOCKBACK.getName(), value);
+        return this;
     }
 
-    public void putAttackSpeed(Map<Item, Multimap<String, AttributeModifier>> origin, Item item, Double value) {
+    public AttributeMapBuilder putAttackSpeed(Item item, Double value) {
 
-        this.putMultimapMap(origin, item, SharedMonsterAttributes.ATTACK_SPEED.getName(), value);
+        this.putMultimapMap(item, SharedMonsterAttributes.ATTACK_SPEED.getName(), value);
+        return this;
     }
 
-    public void putReachDistance(Map<Item, Multimap<String, AttributeModifier>> origin, Item item, Double value) {
+    public AttributeMapBuilder putReachDistance(Item item, Double value) {
 
-        this.putMultimapMap(origin, item, PlayerEntity.REACH_DISTANCE.getName(), value);
+        this.putMultimapMap(item, PlayerEntity.REACH_DISTANCE.getName(), value);
+        return this;
     }
 
-    public void putAttackReach(Map<Item, Multimap<String, AttributeModifier>> origin, Item item, Double value) {
+    public AttributeMapBuilder putAttackReach(Item item, Double value) {
 
-        this.putMultimapMap(origin, item, RegisterAttributeHandler.ATTACK_REACH.getName(), value);
+        this.putMultimapMap(item, RegisterAttributeHandler.ATTACK_REACH.getName(), value);
+        return this;
     }
 
-    public void putArmor(Map<Item, Multimap<String, AttributeModifier>> origin, Item item, Double value) {
+    public AttributeMapBuilder putArmor(Item item, Double value) {
 
-        this.putMultimapMap(origin, item, SharedMonsterAttributes.ARMOR.getName(), value);
+        this.putMultimapMap(item, SharedMonsterAttributes.ARMOR.getName(), value);
+        return this;
     }
 
-    public void putArmorToughness(Map<Item, Multimap<String, AttributeModifier>> origin, Item item, Double value) {
+    public AttributeMapBuilder putArmorToughness(Item item, Double value) {
 
-        this.putMultimapMap(origin, item, SharedMonsterAttributes.ARMOR_TOUGHNESS.getName(), value);
+        this.putMultimapMap(item, SharedMonsterAttributes.ARMOR_TOUGHNESS.getName(), value);
+        return this;
     }
 
 }

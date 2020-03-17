@@ -24,8 +24,7 @@ import net.minecraft.util.math.Vec3d;
 public class Hooks {
 
     /**
-     * add custom attributes to an item when the attribute mmap is generated in {@link net.minecraft.item.Item#getAttributeModifiers}
-     * attributes already present will be modified to ensure the item tooltip displaying values properly
+     * add custom attributes to an item when the attribute map is generated in {@link net.minecraft.item.Item#getAttributeModifiers}
      */
     public static Multimap<String, AttributeModifier> adjustAttributeMap(Multimap<String, AttributeModifier> multimap, EquipmentSlotType equipmentSlot, ItemStack stack) {
 
@@ -40,6 +39,7 @@ public class Hooks {
 
     /**
      * separate attack reach from reach distance, this sets the base value
+     * in {@link net.minecraft.client.renderer.GameRenderer#getMouseOver}
      */
     public static double getAttackReachDistance() {
 
@@ -55,6 +55,7 @@ public class Hooks {
 
     /**
      * separate attack reach from reach distance, this sets a squared value
+     * in {@link net.minecraft.client.renderer.GameRenderer#getMouseOver}
      */
     public static double getSquareAttackDistance(float partialTicks, Entity entity) {
 
@@ -74,6 +75,7 @@ public class Hooks {
 
     /**
      * adjust max square distance for finding a pointed entity on the client which is normally hardcoded to 9.0
+     * in {@link net.minecraft.client.renderer.GameRenderer#getMouseOver}
      */
     public static double getMaxSquareRange(double d0) {
 
@@ -82,6 +84,7 @@ public class Hooks {
 
     /**
      * adjust max square distance for finding a pointed entity on the server which is normally hardcoded to 9.0
+     * in {@link net.minecraft.network.play.ServerPlayNetHandler#processUseEntity}
      */
     public static double getEntityReachDistance(ServerPlayerEntity player, Entity entity) {
 
@@ -89,19 +92,28 @@ public class Hooks {
         return player.canEntityBeSeen(entity) ? d0 : d0 / 4.0;
     }
 
+    /**
+     * set default knockback strength from attribute instead of zero in {@link net.minecraft.entity.player.PlayerEntity#attackTargetEntityWithCurrentItem}
+     * the attribute is not registered by default for players, this is done separately
+     */
     public static int getKnockbackAttribute(PlayerEntity player) {
 
         return (int) Math.ceil(player.getAttribute(SharedMonsterAttributes.ATTACK_KNOCKBACK).getValue());
     }
 
     /**
-     * don't add a harvest level if it had not been present before
+     * pass through harvest level in {@link net.minecraft.item.Item#getHarvestLevel}
+     * just make sure to not change anything if it had not been present before
      */
     public static int getHarvestLevel(int toolLevel, Item item) {
 
         return toolLevel != -1 ? ((SimpleItemProperty) PropertySyncManager.getInstance().getProperty("harvest_level")).getValue(item, (double) toolLevel).intValue() : toolLevel;
     }
 
+    /**
+     * pass through enchantabilty in {@link net.minecraft.enchantment.EnchantmentHelper#calcItemStackEnchantability}
+     * and {@link net.minecraft.enchantment.EnchantmentHelper#buildEnchantmentList}
+     */
     public static int getItemEnchantability(int enchantability, ItemStack stack) {
 
         return ((SimpleItemProperty) PropertySyncManager.getInstance().getProperty("enchantability")).getValue(stack.getItem(), (double) enchantability).intValue();

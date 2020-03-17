@@ -1,22 +1,16 @@
 package com.fuzs.materialmaster.core.provider;
 
 import com.fuzs.materialmaster.MaterialMaster;
-import com.fuzs.materialmaster.common.RegisterAttributeHandler;
 import com.fuzs.materialmaster.config.ConfigBuildHandler;
+import com.fuzs.materialmaster.core.builder.AttributeMapBuilder;
 import com.fuzs.materialmaster.core.builder.EntryCollectionBuilder;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class ConfigPropertyProvider extends AbstractPropertyProvider {
 
@@ -37,17 +31,17 @@ public class ConfigPropertyProvider extends AbstractPropertyProvider {
     @Override
     public Map<Item, Multimap<String, AttributeModifier>> getAttributes() {
 
-        Map<Item, Multimap<String, AttributeModifier>> attributes = Maps.newHashMap();
-        this.buildAttributeMap(attributes, ConfigBuildHandler.KNOCKBACK_RESISTANCE.get(), SharedMonsterAttributes.KNOCKBACK_RESISTANCE.getName());
-        this.buildAttributeMap(attributes, ConfigBuildHandler.ATTACK_DAMAGE.get(), SharedMonsterAttributes.ATTACK_DAMAGE.getName());
-        this.buildAttributeMap(attributes, ConfigBuildHandler.ATTACK_KNOCKBACK.get(), SharedMonsterAttributes.ATTACK_KNOCKBACK.getName());
-        this.buildAttributeMap(attributes, ConfigBuildHandler.ATTACK_SPEED.get(), SharedMonsterAttributes.ATTACK_SPEED.getName());
-        this.buildAttributeMap(attributes, ConfigBuildHandler.REACH_DISTANCE.get(), PlayerEntity.REACH_DISTANCE.getName());
-        this.buildAttributeMap(attributes, ConfigBuildHandler.ATTACK_REACH.get(), RegisterAttributeHandler.ATTACK_REACH.getName());
-        this.buildAttributeMap(attributes, ConfigBuildHandler.ARMOR.get(), SharedMonsterAttributes.ARMOR.getName());
-        this.buildAttributeMap(attributes, ConfigBuildHandler.ARMOR_TOUGHNESS.get(), SharedMonsterAttributes.ARMOR_TOUGHNESS.getName());
+        AttributeMapBuilder builder = AttributeMapBuilder.create(this.getMainhandModifierId(), this.getArmorModifierIds());
+        this.entryBuilder.buildEntryMap(ConfigBuildHandler.KNOCKBACK_RESISTANCE.get()).forEach(builder::putKnockbackResistance);
+        this.entryBuilder.buildEntryMap(ConfigBuildHandler.ATTACK_DAMAGE.get()).forEach(builder::putAttackDamage);
+        this.entryBuilder.buildEntryMap(ConfigBuildHandler.ATTACK_KNOCKBACK.get()).forEach(builder::putAttackKnockback);
+        this.entryBuilder.buildEntryMap(ConfigBuildHandler.ATTACK_SPEED.get()).forEach(builder::putAttackSpeed);
+        this.entryBuilder.buildEntryMap(ConfigBuildHandler.REACH_DISTANCE.get()).forEach(builder::putReachDistance);
+        this.entryBuilder.buildEntryMap(ConfigBuildHandler.ATTACK_REACH.get()).forEach(builder::putAttackReach);
+        this.entryBuilder.buildEntryMap(ConfigBuildHandler.ARMOR.get()).forEach(builder::putArmor);
+        this.entryBuilder.buildEntryMap(ConfigBuildHandler.ARMOR_TOUGHNESS.get()).forEach(builder::putArmorToughness);
 
-        return attributes;
+        return builder.build();
     }
 
     @Override
@@ -90,22 +84,6 @@ public class ConfigPropertyProvider extends AbstractPropertyProvider {
     protected UUID[] getArmorModifierIds() {
 
         return new UUID[]{UUID.fromString("C29FA54E-C2BD-4137-897D-D7B363DCA34B"), UUID.fromString("45A03570-9501-4902-ADA9-7E2EF5A2C2D8"), UUID.fromString("CE18081D-3CDB-4288-A45F-99CE6C5530AB"), UUID.fromString("DBC90783-1621-453D-A4E4-739903307E4B")};
-    }
-
-    private Map<Item, Map.Entry<String, AttributeModifier>> buildAttributeMap(List<String> locations, String attribute) {
-
-        return this.entryBuilder.buildEntryMap(locations).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> {
-
-            UUID id = entry.getKey() instanceof ArmorItem ? this.getArmorModifierIds()[((ArmorItem) entry.getKey()).getEquipmentSlot().getIndex()] : this.getMainhandModifierId();
-            AttributeModifier modifier = new AttributeModifier(id, MaterialMaster.NAME + " modifier", entry.getValue(), AttributeModifier.Operation.ADDITION);
-
-            return Maps.immutableEntry(attribute, modifier);
-        }));
-    }
-
-    private void buildAttributeMap(Map<Item, Multimap<String, AttributeModifier>> origin, List<String> locations, String attribute) {
-
-        this.getAttributeBuilder().putMultimapMap(origin, this.buildAttributeMap(locations, attribute));
     }
 
 }
