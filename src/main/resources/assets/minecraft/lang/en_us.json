@@ -1,4 +1,5 @@
 {
+  "attribute.name.generic.attackKnockback": "Attack Knockback",
   "attribute.name.generic.reachDistance": "Reach Distance",
   "attribute.name.generic.attackReach": "Attack Reach"
 }

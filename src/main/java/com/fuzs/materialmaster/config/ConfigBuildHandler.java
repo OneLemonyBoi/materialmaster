@@ -56,7 +56,7 @@ public class ConfigBuildHandler {
         ATTACK_SPEED = ConfigBuildHandler.BUILDER.comment("Specify a value added to the attack speed attribute for any item.").define("Attack Speed List", Lists.newArrayList());
         REACH_DISTANCE = ConfigBuildHandler.BUILDER.comment("Specify a value added to the reach distance attribute for any item.").define("Reach Distance List", Lists.newArrayList());
         ATTACK_REACH = ConfigBuildHandler.BUILDER.comment("Specify a value added to the attack reach attribute for any item.").define("Attack Reach List", Lists.newArrayList());
-        ARMOR = ConfigBuildHandler.BUILDER.comment("Specify a value added to the armor attribute for any item.").define("Amor List", Lists.newArrayList());
+        ARMOR = ConfigBuildHandler.BUILDER.comment("Specify a value added to the armor attribute for any item.").define("Armor List", Lists.newArrayList());
         ARMOR_TOUGHNESS = ConfigBuildHandler.BUILDER.comment("Specify a value added to the armor toughness attribute for any item.").define("Armor Toughness List", Lists.newArrayList());
         BUILDER.pop();
 

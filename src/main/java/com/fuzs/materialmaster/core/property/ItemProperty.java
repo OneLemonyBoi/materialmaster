@@ -63,7 +63,7 @@ public abstract class ItemProperty<T> {
 
         if (this.properties.containsKey(item)) {
 
-            MaterialMaster.LOGGER.warn("Property \"" + this.name + "\" for Item \"" + item + "\" has been overwritten by " + provider);
+            MaterialMaster.LOGGER.warn("Property \"" + this.name + "\" for item \"" + item.getDisplayName(ItemStack.EMPTY).getUnformattedComponentText() + "\" has been overwritten by " + provider);
         }
     }
 
@@ -71,7 +71,7 @@ public abstract class ItemProperty<T> {
 
         if (!flag) {
 
-            MaterialMaster.LOGGER.error("Unable to set \"" + this.name + "\" property for item \"" + item.getDisplayName(ItemStack.EMPTY).getUnformattedComponentText() + "\": " + message);
+            MaterialMaster.LOGGER.error("Unable to set property \"" + this.name + "\" for item \"" + item.getDisplayName(ItemStack.EMPTY).getUnformattedComponentText() + "\": " + message);
         }
 
         return flag;

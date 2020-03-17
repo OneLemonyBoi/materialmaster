@@ -5,17 +5,14 @@ import com.google.common.collect.Sets;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 @SuppressWarnings("unused")
-public class StringListBuilder<T extends IForgeRegistryEntry<T>> extends StringListParser<T> {
+public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends StringListParser<T> {
 
-    public StringListBuilder(IForgeRegistry<T> registry) {
+    public EntryCollectionBuilder(IForgeRegistry<T> registry) {
 
         super(registry);
     }
@@ -23,6 +20,11 @@ public class StringListBuilder<T extends IForgeRegistryEntry<T>> extends StringL
     public Set<T> buildEntrySet(List<String> locations) {
 
         return this.buildEntrySetWithCondition(locations, flag -> true, "");
+    }
+
+    public Map<T, Double> buildEntryMap(List<String> locations) {
+
+        return this.buildEntryMapWithCondition(locations, (entry, value) -> true, "");
     }
 
     public Set<T> buildEntrySetWithCondition(List<String> locations, Predicate<T> condition, String message) {
@@ -34,7 +36,10 @@ public class StringListBuilder<T extends IForgeRegistryEntry<T>> extends StringL
 
                 if (condition.test(entry)) {
 
-                    set.add(entry);
+                    if (this.checkOverwrite(set.contains(entry), source)) {
+
+                        set.add(entry);
+                    }
                 } else {
 
                     this.logStringParsingError(source, message);
@@ -45,27 +50,12 @@ public class StringListBuilder<T extends IForgeRegistryEntry<T>> extends StringL
         return set;
     }
 
-    public Map<T, Double> buildEntryMap(List<String> locations) {
-
-        return this.buildEntryMapWithCondition(locations, (entry, value) -> true, "");
-    }
-
-    public Map<T, Double> buildRangedEntryMap(List<String> locations, Double start, Double end) {
-
-        return this.buildEntryMapWithCondition(locations, (entry, value) -> start <= 0 && value >= end, "");
-    }
-
-    public Map<T, Double> buildRangedEntryMapWithCondition(List<String> locations, Double start, Double end, BiPredicate<T, Double> condition, String message) {
-
-        return this.buildEntryMapWithCondition(locations, (entry, value) -> condition.test(entry, value) && start <= 0 && value >= end, message);
-    }
-
     public Map<T, Double> buildEntryMapWithCondition(List<String> locations, BiPredicate<T, Double> condition, String message) {
 
         Map<T, Double> map = Maps.newHashMap();
         for (String source : locations) {
 
-            String[] s = source.split(",");
+            String[] s = Arrays.stream(source.split(",")).map(String::trim).toArray(String[]::new);
             if (s.length == 2) {
 
                 Optional<T> entry = this.getEntryFromRegistry(s[0]);
@@ -82,7 +72,10 @@ public class StringListBuilder<T extends IForgeRegistryEntry<T>> extends StringL
 
                     if (condition.test(entry.get(), size.get())) {
 
-                        map.put(entry.get(), size.get());
+                        if (this.checkOverwrite(map.containsKey(entry.get()), source)) {
+
+                            map.put(entry.get(), size.get());
+                        }
                     } else {
 
                         this.logStringParsingError(source, message);

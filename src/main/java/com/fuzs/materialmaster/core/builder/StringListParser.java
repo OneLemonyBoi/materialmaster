@@ -20,7 +20,17 @@ public class StringListParser<T extends IForgeRegistryEntry<T>> {
 
     protected final void logStringParsingError(String entry, String message) {
         
-        MaterialMaster.LOGGER.warn("Unable to parse entry \"" + entry + "\": " + message);
+        MaterialMaster.LOGGER.error("Unable to parse entry \"" + entry + "\": " + message);
+    }
+
+    protected final boolean checkOverwrite(boolean flag, String entry) {
+
+        if (flag) {
+
+            this.logStringParsingError(entry, "Already present");
+        }
+
+        return !flag;
     }
 
     protected final Optional<ResourceLocation> parseResourceLocation(String source) {

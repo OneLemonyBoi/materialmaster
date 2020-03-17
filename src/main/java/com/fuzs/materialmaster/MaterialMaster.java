@@ -5,6 +5,7 @@ import com.fuzs.materialmaster.common.DigSpeedHandler;
 import com.fuzs.materialmaster.common.RegisterAttributeHandler;
 import com.fuzs.materialmaster.config.ConfigBuildHandler;
 import com.fuzs.materialmaster.core.PropertySyncManager;
+import com.fuzs.materialmaster.core.provider.CombatPropertyProvider;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -36,6 +37,7 @@ public class MaterialMaster {
     private void onCommonSetup(final FMLCommonSetupEvent evt) {
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(PropertySyncManager.getInstance()::onModConfig);
+        PropertySyncManager.getInstance().registerProvider(new CombatPropertyProvider());
         MinecraftForge.EVENT_BUS.register(new RegisterAttributeHandler());
         MinecraftForge.EVENT_BUS.register(new DigSpeedHandler());
     }
