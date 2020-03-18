@@ -1,4 +1,4 @@
-package com.fuzs.materialmaster.core.provider;
+package com.fuzs.materialmaster.api.provider;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;

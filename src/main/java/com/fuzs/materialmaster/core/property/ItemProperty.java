@@ -1,7 +1,7 @@
 package com.fuzs.materialmaster.core.property;
 
 import com.fuzs.materialmaster.MaterialMaster;
-import com.fuzs.materialmaster.core.provider.AbstractPropertyProvider;
+import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;
 import com.google.common.collect.Maps;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

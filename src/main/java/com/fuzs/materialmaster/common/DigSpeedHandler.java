@@ -20,15 +20,19 @@ public class DigSpeedHandler {
         PlayerEntity player = evt.getPlayer();
         float f = player.inventory.getDestroySpeed(evt.getState());
         float ratio = 1.0F;
-        // won't apply when the tool is not effective on the current block
-        if (f > 1.0F) {
 
-            ItemStack itemstack = player.getHeldItemMainhand();
-            if (!itemstack.isEmpty()) {
+        ItemStack itemstack = player.getHeldItemMainhand();
+        if (!itemstack.isEmpty()) {
 
-                float speed = ((SimpleItemProperty) PropertySyncManager.getInstance().getProperty("dig_speed")).getValue(itemstack.getItem(), (double) f).floatValue();
+            float speed = ((SimpleItemProperty) PropertySyncManager.getInstance().getProperty("dig_speed")).getValue(itemstack.getItem(), (double) f).floatValue();
+            // won't apply when the tool is not effective on the current block, but will allow disabling dig speed for any block
+            if (speed == 0.0F || f > 1.0F) {
+
                 ratio = speed / f;
                 f = speed;
+            }
+
+            if (f > 1.0F) {
 
                 int level = EnchantmentHelper.getEfficiencyModifier(player);
                 if (level > 0) {

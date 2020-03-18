@@ -1,4 +1,4 @@
-package com.fuzs.materialmaster.core.builder;
+package com.fuzs.materialmaster.api.builder;
 
 import com.fuzs.materialmaster.MaterialMaster;
 import net.minecraft.util.ResourceLocation;

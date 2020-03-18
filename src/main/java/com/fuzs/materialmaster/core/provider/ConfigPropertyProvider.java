@@ -1,20 +1,21 @@
 package com.fuzs.materialmaster.core.provider;
 
 import com.fuzs.materialmaster.MaterialMaster;
+import com.fuzs.materialmaster.api.PropertyProviderUtils;
+import com.fuzs.materialmaster.api.builder.AttributeMapBuilder;
+import com.fuzs.materialmaster.api.builder.EntryCollectionBuilder;
+import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;
 import com.fuzs.materialmaster.config.ConfigBuildHandler;
-import com.fuzs.materialmaster.core.builder.AttributeMapBuilder;
-import com.fuzs.materialmaster.core.builder.EntryCollectionBuilder;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.item.Item;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Map;
 import java.util.UUID;
 
 public class ConfigPropertyProvider extends AbstractPropertyProvider {
 
-    private final EntryCollectionBuilder<Item> entryBuilder = new EntryCollectionBuilder<>(ForgeRegistries.ITEMS);
+    private final EntryCollectionBuilder<Item> entryBuilder = PropertyProviderUtils.createItemBuilder();
 
     @Override
     public boolean isEnabled() {

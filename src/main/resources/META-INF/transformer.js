@@ -67,6 +67,7 @@ function initializeCoreMod() {
         },
 
         // enable generic.attackKnockback attribute for players
+        // make it possible to disable range check when interacting with containers
         'player_entity_patch': {
             'target': {
                 'type': 'CLASS',
@@ -78,7 +79,29 @@ function initializeCoreMod() {
                     name: "attackTargetEntityWithCurrentItem",
                     desc: "(Lnet/minecraft/entity/Entity;)V",
                     patches: [patchPlayerEntityAttackTargetEntityWithCurrentItem]
+                }, {
+                    obfName: "func_70071_h_",
+                    name: "tick",
+                    desc: "()V",
+                    patches: [patchPlayerEntityTick]
                 }], classNode, "PlayerEntity");
+                return classNode;
+            }
+        },
+
+        // make it possible to disable range check when interacting with containers
+        'server_player_entity_patch': {
+            'target': {
+                'type': 'CLASS',
+                'name': 'net.minecraft.entity.player.ServerPlayerEntity'
+            },
+            'transformer': function(classNode) {
+                patchMethod([{
+                    obfName: "func_70071_h_",
+                    name: "tick",
+                    desc: "()V",
+                    patches: [patchPlayerEntityTick]
+                }], classNode, "ServerPlayerEntity");
                 return classNode;
             }
         },
@@ -180,6 +203,22 @@ function patchInstructions(method, filter, action, obfuscated) {
     }
 }
 
+var patchPlayerEntityTick = {
+    filter: function(node, obfuscated) {
+        if (node instanceof VarInsnNode && node.getOpcode().equals(Opcodes.ALOAD) && node.var.equals(0)) {
+            var nextNode = node.getNext();
+            if (matchesMethod(nextNode, "net/minecraft/inventory/container/Container", obfuscated ? "func_75145_c" : "canInteractWith", "(Lnet/minecraft/entity/player/PlayerEntity;)Z")) {
+                return nextNode;
+            }
+        }
+    },
+    action: function(node, instructions, obfuscated) {
+        var insnList = new InsnList();
+        insnList.add(generateHook("canInteractWith", "(Z)Z"));
+        instructions.insert(node, insnList);
+    }
+};
+
 var patchItemGetHarvestLevel = {
     filter: function(node, obfuscated) {
         if (node instanceof InsnNode && node.getOpcode().equals(Opcodes.IRETURN)) {
@@ -253,10 +292,13 @@ var patchPlayerEntityAttackTargetEntityWithCurrentItem = {
 
 var patchServerPlayNetHandlerProcessUseEntity = {
     filter: function(node, obfuscated) {
-        if (node instanceof VarInsnNode && node.getOpcode().equals(Opcodes.DLOAD) && node.var.equals(5)) {
-            var nextNode = node.getPrevious();
+        if (node instanceof VarInsnNode && node.getOpcode().equals(Opcodes.ALOAD) && node.var.equals(3)) {
+            var nextNode = node.getNext();
             if (matchesMethod(nextNode, "net/minecraft/entity/player/ServerPlayerEntity", obfuscated ? "func_70068_e" : "getDistanceSq", "(Lnet/minecraft/entity/Entity;)D")) {
-                return node;
+                nextNode = nextNode.getNext();
+                if (nextNode instanceof VarInsnNode && nextNode.getOpcode().equals(Opcodes.DLOAD) && nextNode.var.equals(5)) {
+                    return nextNode;
+                }
             }
         }
     },
@@ -294,12 +336,12 @@ var patchGameRendererGetMouseOver1 = {
 
 var patchGameRendererGetMouseOver2 = {
     filter: function(node, obfuscated) {
-        if (node instanceof VarInsnNode && node.getOpcode().equals(Opcodes.ALOAD) && node.var.equals(2)) {
+        if (node instanceof VarInsnNode && node.getOpcode().equals(Opcodes.ALOAD) && node.var.equals(5)) {
             var nextNode = node.getNext();
-            if (nextNode instanceof InsnNode && nextNode.getOpcode().equals(Opcodes.FCONST_1)) {
+            if (matchesMethod(nextNode, "net/minecraft/util/math/Vec3d", obfuscated ? "func_72436_e" : "squareDistanceTo", "(Lnet/minecraft/util/math/Vec3d;)D")) {
                 nextNode = nextNode.getNext();
-                if (matchesMethod(nextNode, "net/minecraft/entity/Entity", obfuscated ? "func_70676_i" : "getLook", "(F)Lnet/minecraft/util/math/Vec3d;")) {
-                    return node;
+                if (nextNode instanceof VarInsnNode && nextNode.getOpcode().equals(Opcodes.DSTORE) && nextNode.var.equals(8)) {
+                    return nextNode;
                 }
             }
         }
@@ -318,11 +360,14 @@ var patchGameRendererGetMouseOver2 = {
 
 var patchItemStackGetAttributeModifiers = {
     filter: function(node, obfuscated) {
-        // getAttributeModifiers is a Forge method
-        if (matchesMethod(node, "net/minecraft/item/Item", obfuscated ? "getAttributeModifiers" : "getAttributeModifiers", "(Lnet/minecraft/inventory/EquipmentSlotType;Lnet/minecraft/item/ItemStack;)Lcom/google/common/collect/Multimap;")) {
+        if (node instanceof VarInsnNode && node.getOpcode().equals(Opcodes.ALOAD) && node.var.equals(1)) {
             var nextNode = node.getNext();
-            if (nextNode instanceof VarInsnNode && nextNode.getOpcode().equals(Opcodes.ASTORE)) {
-                return node;
+            if (nextNode instanceof VarInsnNode && nextNode.getOpcode().equals(Opcodes.ALOAD) && nextNode.var.equals(0)) {
+                nextNode = nextNode.getNext();
+                // getAttributeModifiers is a Forge method
+                if (matchesMethod(nextNode, "net/minecraft/item/Item", obfuscated ? "getAttributeModifiers" : "getAttributeModifiers", "(Lnet/minecraft/inventory/EquipmentSlotType;Lnet/minecraft/item/ItemStack;)Lcom/google/common/collect/Multimap;")) {
+                    return nextNode;
+                }
             }
         }
     },

@@ -1,6 +1,7 @@
 package com.fuzs.materialmaster.asm;
 
 import com.fuzs.materialmaster.common.RegisterAttributeHandler;
+import com.fuzs.materialmaster.config.ConfigBuildHandler;
 import com.fuzs.materialmaster.core.PropertySyncManager;
 import com.fuzs.materialmaster.core.property.AttributeItemProperty;
 import com.fuzs.materialmaster.core.property.SimpleItemProperty;
@@ -47,7 +48,7 @@ public class Hooks {
         if (player != null) {
 
             double attrib = player.getAttribute(RegisterAttributeHandler.ATTACK_REACH).getValue();
-            return player.abilities.isCreativeMode ? attrib : attrib - 0.5F;
+            return player.abilities.isCreativeMode ? attrib : attrib - 0.5;
         }
 
         return 0.0;
@@ -59,12 +60,12 @@ public class Hooks {
      */
     public static double getSquareAttackDistance(float partialTicks, Entity entity) {
 
-        double attrib = 0;
+        double attrib = 0.0;
         ClientPlayerEntity player = Minecraft.getInstance().player;
         if (player != null) {
 
             attrib += player.getAttribute(RegisterAttributeHandler.ATTACK_REACH).getValue();
-            attrib -= player.abilities.isCreativeMode ? 0.0F : 0.5F;
+            attrib -= player.abilities.isCreativeMode ? 0.0F : 0.5;
         }
 
         RayTraceResult objectMouseOver = entity.pick(attrib, partialTicks, false);
@@ -117,6 +118,15 @@ public class Hooks {
     public static int getItemEnchantability(int enchantability, ItemStack stack) {
 
         return ((SimpleItemProperty) PropertySyncManager.getInstance().getProperty("enchantability")).getValue(stack.getItem(), (double) enchantability).intValue();
+    }
+
+    /**
+     * disable container interaction range in both {@link net.minecraft.entity.player.PlayerEntity#tick}
+     * and {@link net.minecraft.entity.player.ServerPlayerEntity#tick}
+     */
+    public static boolean canInteractWith(boolean flag) {
+
+        return flag && !ConfigBuildHandler.BYPASS_CONTAINER.get();
     }
 
 }

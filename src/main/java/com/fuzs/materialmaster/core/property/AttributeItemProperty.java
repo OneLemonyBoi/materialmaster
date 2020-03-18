@@ -1,6 +1,6 @@
 package com.fuzs.materialmaster.core.property;
 
-import com.fuzs.materialmaster.core.provider.AbstractPropertyProvider;
+import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.item.Item;

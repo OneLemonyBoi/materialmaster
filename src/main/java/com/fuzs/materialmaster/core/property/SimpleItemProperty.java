@@ -1,6 +1,6 @@
 package com.fuzs.materialmaster.core.property;
 
-import com.fuzs.materialmaster.core.provider.AbstractPropertyProvider;
+import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;
 import net.minecraft.item.Item;
 
 import java.util.Map;
@@ -13,12 +13,12 @@ public class SimpleItemProperty extends ItemProperty<Double> {
 
     public SimpleItemProperty(String name, Function<AbstractPropertyProvider, Map<Item, Double>> provider) {
 
-        this(name, provider, 0.0, Double.MAX_VALUE);
+        this(name, provider, 0.0, Integer.MAX_VALUE);
     }
 
     public SimpleItemProperty(String name, Function<AbstractPropertyProvider, Map<Item, Double>> provider, Predicate<Item> condition, String message) {
 
-        this(name, provider, 0.0, Double.MAX_VALUE, condition, message);
+        this(name, provider, 0.0, Integer.MAX_VALUE, condition, message);
     }
 
     public SimpleItemProperty(String name, Function<AbstractPropertyProvider, Map<Item, Double>> provider, double min, double max) {

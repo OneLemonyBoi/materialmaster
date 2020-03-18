@@ -1,4 +1,4 @@
-package com.fuzs.materialmaster.core.builder;
+package com.fuzs.materialmaster.api.builder;
 
 import com.fuzs.materialmaster.MaterialMaster;
 import com.fuzs.materialmaster.common.RegisterAttributeHandler;
@@ -7,9 +7,11 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 
 import java.util.Map;
 import java.util.UUID;
@@ -38,11 +40,11 @@ public class AttributeMapBuilder {
         return this.attributes;
     }
 
-    private void putMultimapMap(Item item, String attribute, AttributeModifier modifier) {
+    private void putMultimapMap(Item item, IAttribute attribute, AttributeModifier modifier) {
 
         // build
         HashMultimap<String, AttributeModifier> multimap = HashMultimap.create();
-        multimap.put(attribute, modifier);
+        multimap.put(attribute.getName(), modifier);
 
         // combine
         this.attributes.merge(item, multimap, (map1, map2) -> {
@@ -52,7 +54,12 @@ public class AttributeMapBuilder {
         });
     }
 
-    private void putMultimapMap(Item item, String attribute, Double value) {
+    private void putMultimapMap(Item item, IAttribute attribute, Double value) {
+
+        if (attribute.clampValue(value) != value) {
+
+            MaterialMaster.LOGGER.warn("Attribute \"" + attribute.getName() + "\" for item \"" + item.getDisplayName(ItemStack.EMPTY).getUnformattedComponentText() + "\" is out of bounds: " + attribute.clampValue(value) + " != " + value);
+        }
 
         UUID id = item instanceof ArmorItem ? this.armorModifierIds[((ArmorItem) item).getEquipmentSlot().getIndex()] : this.mainhandModifierId;
         AttributeModifier modifier = new AttributeModifier(id, MaterialMaster.NAME + " modifier", value, AttributeModifier.Operation.ADDITION);
@@ -61,49 +68,49 @@ public class AttributeMapBuilder {
 
     public AttributeMapBuilder putKnockbackResistance(Item item, Double value) {
 
-        this.putMultimapMap(item, SharedMonsterAttributes.KNOCKBACK_RESISTANCE.getName(), value);
+        this.putMultimapMap(item, SharedMonsterAttributes.KNOCKBACK_RESISTANCE, value);
         return this;
     }
 
     public AttributeMapBuilder putAttackDamage(Item item, Double value) {
 
-        this.putMultimapMap(item, SharedMonsterAttributes.ATTACK_DAMAGE.getName(), value);
+        this.putMultimapMap(item, SharedMonsterAttributes.ATTACK_DAMAGE, value);
         return this;
     }
 
     public AttributeMapBuilder putAttackKnockback(Item item, Double value) {
 
-        this.putMultimapMap(item, SharedMonsterAttributes.ATTACK_KNOCKBACK.getName(), value);
+        this.putMultimapMap(item, SharedMonsterAttributes.ATTACK_KNOCKBACK, value);
         return this;
     }
 
     public AttributeMapBuilder putAttackSpeed(Item item, Double value) {
 
-        this.putMultimapMap(item, SharedMonsterAttributes.ATTACK_SPEED.getName(), value);
+        this.putMultimapMap(item, SharedMonsterAttributes.ATTACK_SPEED, value);
         return this;
     }
 
     public AttributeMapBuilder putReachDistance(Item item, Double value) {
 
-        this.putMultimapMap(item, PlayerEntity.REACH_DISTANCE.getName(), value);
+        this.putMultimapMap(item, PlayerEntity.REACH_DISTANCE, value);
         return this;
     }
 
     public AttributeMapBuilder putAttackReach(Item item, Double value) {
 
-        this.putMultimapMap(item, RegisterAttributeHandler.ATTACK_REACH.getName(), value);
+        this.putMultimapMap(item, RegisterAttributeHandler.ATTACK_REACH, value);
         return this;
     }
 
     public AttributeMapBuilder putArmor(Item item, Double value) {
 
-        this.putMultimapMap(item, SharedMonsterAttributes.ARMOR.getName(), value);
+        this.putMultimapMap(item, SharedMonsterAttributes.ARMOR, value);
         return this;
     }
 
     public AttributeMapBuilder putArmorToughness(Item item, Double value) {
 
-        this.putMultimapMap(item, SharedMonsterAttributes.ARMOR_TOUGHNESS.getName(), value);
+        this.putMultimapMap(item, SharedMonsterAttributes.ARMOR_TOUGHNESS, value);
         return this;
     }
 
