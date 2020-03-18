@@ -1,5 +1,7 @@
 {
   "attribute.name.generic.attackKnockback": "Attack Knockback",
+  "attribute.name.forge.swimSpeed": "Swim Speed",
+  "attribute.name.forge.entity_gravity": "Gravity",
   "attribute.name.generic.reachDistance": "Reach Distance",
-  "attribute.name.generic.attackReach": "Attack Reach"
+  "attribute.name.materialmaster.attackReach": "Attack Reach"
 }

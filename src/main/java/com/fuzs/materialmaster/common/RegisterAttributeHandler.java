@@ -1,6 +1,8 @@
 package com.fuzs.materialmaster.common;
 
+import com.fuzs.materialmaster.MaterialMaster;
 import com.fuzs.materialmaster.config.ConfigBuildHandler;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
@@ -11,7 +13,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class RegisterAttributeHandler {
 
-    public static final IAttribute ATTACK_REACH = new RangedAttribute(null, "generic.attackReach", 5.0, 0.0, 1024.0).setShouldWatch(true);
+    public static final IAttribute ATTACK_REACH = new RangedAttribute(null,  MaterialMaster.MODID + ".attackReach", 5.0, 0.0, 1024.0).setShouldWatch(true);
 
     @SuppressWarnings("unused")
     @SubscribeEvent
@@ -32,12 +34,17 @@ public class RegisterAttributeHandler {
         if (evt.getEntity() instanceof PlayerEntity) {
 
             PlayerEntity player = (PlayerEntity) evt.getEntity();
+            player.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(ConfigBuildHandler.DEFAULT_MAX_HEALTH.get());
             player.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(ConfigBuildHandler.DEFAULT_KNOCKBACK_RESISTANCE.get());
+            player.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(ConfigBuildHandler.DEFAULT_MOVEMENT_SPEED.get());
             player.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(ConfigBuildHandler.DEFAULT_ATTACK_DAMAGE.get());
-            player.getAttribute(SharedMonsterAttributes.ATTACK_SPEED).setBaseValue(ConfigBuildHandler.DEFAULT_ATTACK_SPEED.get());
-            player.getAttribute(PlayerEntity.REACH_DISTANCE).setBaseValue(ConfigBuildHandler.DEFAULT_REACH_DISTANCE.get());
             player.getAttribute(SharedMonsterAttributes.ARMOR).setBaseValue(ConfigBuildHandler.DEFAULT_ARMOR.get());
             player.getAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).setBaseValue(ConfigBuildHandler.DEFAULT_ARMOR_TOUGHNESS.get());
+            player.getAttribute(SharedMonsterAttributes.LUCK).setBaseValue(ConfigBuildHandler.DEFAULT_LUCK.get());
+            player.getAttribute(LivingEntity.SWIM_SPEED).setBaseValue(ConfigBuildHandler.DEFAULT_SWIM_SPEED.get());
+            player.getAttribute(LivingEntity.ENTITY_GRAVITY).setBaseValue(ConfigBuildHandler.DEFAULT_GRAVITY.get());
+            player.getAttribute(PlayerEntity.REACH_DISTANCE).setBaseValue(ConfigBuildHandler.DEFAULT_REACH_DISTANCE.get());
+            player.getAttribute(SharedMonsterAttributes.ATTACK_SPEED).setBaseValue(ConfigBuildHandler.DEFAULT_ATTACK_SPEED.get());
         }
     }
 

@@ -32,7 +32,7 @@ public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends St
         Set<T> set = Sets.newHashSet();
         for (String source : locations) {
 
-            this.parseResourceLocation(source).flatMap(this::getEntryFromRegistry).ifPresent(entry -> {
+            this.getEntryFromRegistry(source.trim()).forEach(entry -> {
 
                 if (condition.test(entry)) {
 
@@ -58,29 +58,34 @@ public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends St
             String[] s = Arrays.stream(source.split(",")).map(String::trim).toArray(String[]::new);
             if (s.length == 2) {
 
-                Optional<T> entry = this.getEntryFromRegistry(s[0]);
+                List<T> entries = this.getEntryFromRegistry(s[0]);
+                if (entries.isEmpty()) {
+
+                    continue;
+                }
+
                 Optional<Double> size = Optional.empty();
                 try {
 
                     size = Optional.of(Double.parseDouble(s[1]));
-                } catch (NumberFormatException e) {
+                } catch (NumberFormatException ignored) {
 
                     this.logStringParsingError(source, "Invalid number format");
                 }
 
-                if (entry.isPresent() && size.isPresent()) {
+                size.ifPresent(value -> entries.forEach(entry -> {
 
-                    if (condition.test(entry.get(), size.get())) {
+                    if (condition.test(entry, value)) {
 
-                        if (this.checkOverwrite(map.containsKey(entry.get()), source)) {
+                        if (this.checkOverwrite(map.containsKey(entry), entry.toString())) {
 
-                            map.put(entry.get(), size.get());
+                            map.put(entry, value);
                         }
                     } else {
 
                         this.logStringParsingError(source, message);
                     }
-                }
+                }));
             } else {
 
                 this.logStringParsingError(source, "Insufficient number of arguments");

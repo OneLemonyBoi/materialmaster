@@ -33,14 +33,19 @@ public class ConfigPropertyProvider extends AbstractPropertyProvider {
     public Map<Item, Multimap<String, AttributeModifier>> getAttributes() {
 
         AttributeMapBuilder builder = AttributeMapBuilder.create(this.getMainhandModifierId(), this.getArmorModifierIds());
+        this.entryBuilder.buildEntryMap(ConfigBuildHandler.MAX_HEALTH.get()).forEach(builder::putMaxHealth);
         this.entryBuilder.buildEntryMap(ConfigBuildHandler.KNOCKBACK_RESISTANCE.get()).forEach(builder::putKnockbackResistance);
+        this.entryBuilder.buildEntryMap(ConfigBuildHandler.MOVEMENT_SPEED.get()).forEach(builder::putMovementSpeed);
         this.entryBuilder.buildEntryMap(ConfigBuildHandler.ATTACK_DAMAGE.get()).forEach(builder::putAttackDamage);
         this.entryBuilder.buildEntryMap(ConfigBuildHandler.ATTACK_KNOCKBACK.get()).forEach(builder::putAttackKnockback);
         this.entryBuilder.buildEntryMap(ConfigBuildHandler.ATTACK_SPEED.get()).forEach(builder::putAttackSpeed);
-        this.entryBuilder.buildEntryMap(ConfigBuildHandler.REACH_DISTANCE.get()).forEach(builder::putReachDistance);
-        this.entryBuilder.buildEntryMap(ConfigBuildHandler.ATTACK_REACH.get()).forEach(builder::putAttackReach);
         this.entryBuilder.buildEntryMap(ConfigBuildHandler.ARMOR.get()).forEach(builder::putArmor);
         this.entryBuilder.buildEntryMap(ConfigBuildHandler.ARMOR_TOUGHNESS.get()).forEach(builder::putArmorToughness);
+        this.entryBuilder.buildEntryMap(ConfigBuildHandler.LUCK.get()).forEach(builder::putLuck);
+        this.entryBuilder.buildEntryMap(ConfigBuildHandler.SWIM_SPEED.get()).forEach(builder::putSwimSpeed);
+        this.entryBuilder.buildEntryMap(ConfigBuildHandler.GRAVITY.get()).forEach(builder::putGravity);
+        this.entryBuilder.buildEntryMap(ConfigBuildHandler.REACH_DISTANCE.get()).forEach(builder::putReachDistance);
+        this.entryBuilder.buildEntryMap(ConfigBuildHandler.ATTACK_REACH.get()).forEach(builder::putAttackReach);
 
         return builder.build();
     }

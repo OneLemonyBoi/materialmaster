@@ -1,11 +1,15 @@
 package com.fuzs.materialmaster.api.builder;
 
 import com.fuzs.materialmaster.MaterialMaster;
+import com.google.common.collect.Lists;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class StringListParser<T extends IForgeRegistryEntry<T>> {
 
@@ -33,42 +37,68 @@ public class StringListParser<T extends IForgeRegistryEntry<T>> {
         return !flag;
     }
 
-    protected final Optional<ResourceLocation> parseResourceLocation(String source) {
+    protected final List<T> getEntryFromRegistry(String source) {
 
-        String[] s = source.split(":");
-        Optional<ResourceLocation> location = Optional.empty();
-        if (s.length == 1) {
+        List<T> entries = Lists.newArrayList();
+        Optional<ResourceLocation> location = Optional.ofNullable(ResourceLocation.tryCreate(source));
+        if (location.isPresent()) {
 
-            location = Optional.of(new ResourceLocation(s[0]));
-        } else if (s.length == 2) {
-
-            location = Optional.of(new ResourceLocation(s[0], s[1]));
+            Optional<T> entry = this.getEntryFromRegistry(location.get());
+            entry.ifPresent(entries::add);
         } else {
 
-            this.logStringParsingError(source, "Insufficient number of arguments");
+            this.getWildcardEntries(source, entries);
         }
 
-        return location;
+        return entries;
     }
 
-    protected final Optional<T> getEntryFromRegistry(ResourceLocation location) {
+    private void getWildcardEntries(String source, List<T> entries) {
+
+        String[] s = source.split(":");
+        switch (s.length) {
+
+            case 1:
+
+                entries.addAll(this.getListFromRegistry("minecraft", s[0]));
+                break;
+            case 2:
+
+                entries.addAll(this.getListFromRegistry(s[0], s[1]));
+                break;
+            default:
+
+                this.logStringParsingError(source, "Invalid resource location format");
+        }
+    }
+
+    private Optional<T> getEntryFromRegistry(ResourceLocation location) {
 
         T entry = this.activeRegistry.getValue(location);
-        if (entry != null && entry != this.defaultEntry) {
+        if (entry != null && (entry != this.defaultEntry || this.activeRegistry.containsValue(entry))) {
 
             return Optional.of(entry);
         } else {
 
-            this.logStringParsingError(location.toString(), "Item not found");
+            this.logStringParsingError(location.toString(), "Entry not found");
         }
 
         return Optional.empty();
     }
 
-    protected final Optional<T> getEntryFromRegistry(String source) {
+    private List<T> getListFromRegistry(String namespace, String path) {
 
-        Optional<ResourceLocation> location = this.parseResourceLocation(source);
-        return location.isPresent() ? this.getEntryFromRegistry(location.get()) : Optional.empty();
+        List<T> entries = this.activeRegistry.getEntries().stream()
+                .filter(entry -> entry.getKey().getNamespace().equals(namespace))
+                .filter(entry -> entry.getKey().getPath().matches(path.replace("*", "[a-z0-9/._-]*")))
+                .map(Map.Entry::getValue).collect(Collectors.toList());
+
+        if (entries.isEmpty()) {
+
+            this.logStringParsingError(namespace + ':' + path, "Entry not found");
+        }
+
+        return entries;
     }
     
 }

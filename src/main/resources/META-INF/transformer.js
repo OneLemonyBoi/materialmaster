@@ -10,6 +10,7 @@ var LdcInsnNode = Java.type('org.objectweb.asm.tree.LdcInsnNode');
 var InvokeDynamicInsnNode = Java.type('org.objectweb.asm.tree.InvokeDynamicInsnNode');
 var LabelNode = Java.type('org.objectweb.asm.tree.LabelNode');
 var FrameNode = Java.type('org.objectweb.asm.tree.FrameNode');
+var LineNumberNode = Java.type('org.objectweb.asm.tree.LineNumberNode');
 
 function initializeCoreMod() {
 
@@ -32,7 +33,8 @@ function initializeCoreMod() {
             }
         },
 
-        // extended attack reach
+        // get pointed entity by using attack reach distance
+        // replace hardcoded max range check value
         'game_renderer_patch': {
             'target': {
                 'type': 'CLASS',
@@ -79,29 +81,7 @@ function initializeCoreMod() {
                     name: "attackTargetEntityWithCurrentItem",
                     desc: "(Lnet/minecraft/entity/Entity;)V",
                     patches: [patchPlayerEntityAttackTargetEntityWithCurrentItem]
-                }, {
-                    obfName: "func_70071_h_",
-                    name: "tick",
-                    desc: "()V",
-                    patches: [patchPlayerEntityTick]
                 }], classNode, "PlayerEntity");
-                return classNode;
-            }
-        },
-
-        // make it possible to disable range check when interacting with containers
-        'server_player_entity_patch': {
-            'target': {
-                'type': 'CLASS',
-                'name': 'net.minecraft.entity.player.ServerPlayerEntity'
-            },
-            'transformer': function(classNode) {
-                patchMethod([{
-                    obfName: "func_70071_h_",
-                    name: "tick",
-                    desc: "()V",
-                    patches: [patchPlayerEntityTick]
-                }], classNode, "ServerPlayerEntity");
                 return classNode;
             }
         },
@@ -203,22 +183,6 @@ function patchInstructions(method, filter, action, obfuscated) {
     }
 }
 
-var patchPlayerEntityTick = {
-    filter: function(node, obfuscated) {
-        if (node instanceof VarInsnNode && node.getOpcode().equals(Opcodes.ALOAD) && node.var.equals(0)) {
-            var nextNode = node.getNext();
-            if (matchesMethod(nextNode, "net/minecraft/inventory/container/Container", obfuscated ? "func_75145_c" : "canInteractWith", "(Lnet/minecraft/entity/player/PlayerEntity;)Z")) {
-                return nextNode;
-            }
-        }
-    },
-    action: function(node, instructions, obfuscated) {
-        var insnList = new InsnList();
-        insnList.add(generateHook("canInteractWith", "(Z)Z"));
-        instructions.insert(node, insnList);
-    }
-};
-
 var patchItemGetHarvestLevel = {
     filter: function(node, obfuscated) {
         if (node instanceof InsnNode && node.getOpcode().equals(Opcodes.IRETURN)) {
@@ -235,11 +199,11 @@ var patchItemGetHarvestLevel = {
 
 var patchEnchantmentHelperBuildEnchantmentList = {
     filter: function(node, obfuscated) {
-        // getItemEnchantability is a Forge method
-        if (matchesMethod(node, "net/minecraft/item/ItemStack", obfuscated ? "getItemEnchantability" : "getItemEnchantability", "()I")) {
+        if (node instanceof VarInsnNode && node.getOpcode().equals(Opcodes.ALOAD) && node.var.equals(1)) {
             var nextNode = node.getNext();
-            if (nextNode instanceof VarInsnNode && nextNode.getOpcode().equals(Opcodes.ISTORE) && nextNode.var.equals(6)) {
-                return node;
+            // getItemEnchantability is a Forge method
+            if (matchesMethod(nextNode, "net/minecraft/item/ItemStack", obfuscated ? "getItemEnchantability" : "getItemEnchantability", "()I")) {
+                return nextNode;
             }
         }
     },
@@ -253,11 +217,11 @@ var patchEnchantmentHelperBuildEnchantmentList = {
 
 var patchEnchantmentHelperCalcItemStackEnchantability = {
     filter: function(node, obfuscated) {
-        // getItemEnchantability is a Forge method
-        if (matchesMethod(node, "net/minecraft/item/ItemStack", obfuscated ? "getItemEnchantability" : "getItemEnchantability", "()I")) {
+        if (node instanceof VarInsnNode && node.getOpcode().equals(Opcodes.ALOAD) && node.var.equals(3)) {
             var nextNode = node.getNext();
-            if (nextNode instanceof VarInsnNode && nextNode.getOpcode().equals(Opcodes.ISTORE) && nextNode.var.equals(5)) {
-                return node;
+            // getItemEnchantability is a Forge method
+            if (matchesMethod(nextNode, "net/minecraft/item/ItemStack", obfuscated ? "getItemEnchantability" : "getItemEnchantability", "()I")) {
+                return nextNode;
             }
         }
     },
@@ -271,12 +235,15 @@ var patchEnchantmentHelperCalcItemStackEnchantability = {
 
 var patchPlayerEntityAttackTargetEntityWithCurrentItem = {
     filter: function(node, obfuscated) {
-        if (node instanceof InsnNode && node.getOpcode().equals(Opcodes.ICONST_0)) {
+        if (node instanceof VarInsnNode && node.getOpcode().equals(Opcodes.ISTORE) && node.var.equals(6)) {
             var nextNode = node.getNext();
-            if (nextNode instanceof VarInsnNode && nextNode.getOpcode().equals(Opcodes.ISTORE) && nextNode.var.equals(7)) {
-                nextNode = getNthNode(node, 6);
-                if (matchesMethod(nextNode, "net/minecraft/enchantment/EnchantmentHelper", obfuscated ? "func_77501_a" : "getKnockbackModifier", "(Lnet/minecraft/entity/LivingEntity;)I")) {
-                    return node;
+            if (nextNode instanceof LabelNode) {
+                nextNode = nextNode.getNext();
+                if (nextNode instanceof LineNumberNode) {
+                    nextNode = nextNode.getNext();
+                    if (nextNode instanceof InsnNode && nextNode.getOpcode().equals(Opcodes.ICONST_0)) {
+                        return nextNode;
+                    }
                 }
             }
         }
@@ -313,14 +280,17 @@ var patchServerPlayNetHandlerProcessUseEntity = {
     }
 };
 
-var patchGameRendererGetMouseOver1 = {
+var patchGameRendererGetMouseOver2 = {
     filter: function(node, obfuscated) {
-        if (node instanceof LdcInsnNode) {
+        if (node instanceof VarInsnNode && node.getOpcode().equals(Opcodes.ILOAD) && node.var.equals(6)) {
             var nextNode = node.getNext();
-            if (nextNode instanceof InsnNode && nextNode.getOpcode().equals(Opcodes.DCMPL)) {
-                nextNode = node.getPrevious();
+            if (nextNode instanceof JumpInsnNode && nextNode.getOpcode().equals(Opcodes.IFEQ)) {
+                nextNode = nextNode.getNext();
                 if (nextNode instanceof VarInsnNode && nextNode.getOpcode().equals(Opcodes.DLOAD) && nextNode.var.equals(17)) {
-                    return node;
+                    nextNode = nextNode.getNext();
+                    if (nextNode instanceof LdcInsnNode) {
+                        return nextNode;
+                    }
                 }
             }
         }
@@ -334,7 +304,7 @@ var patchGameRendererGetMouseOver1 = {
     }
 };
 
-var patchGameRendererGetMouseOver2 = {
+var patchGameRendererGetMouseOver1 = {
     filter: function(node, obfuscated) {
         if (node instanceof VarInsnNode && node.getOpcode().equals(Opcodes.ALOAD) && node.var.equals(5)) {
             var nextNode = node.getNext();

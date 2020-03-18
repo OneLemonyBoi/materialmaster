@@ -5,6 +5,7 @@ import com.fuzs.materialmaster.common.RegisterAttributeHandler;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
@@ -66,9 +67,21 @@ public class AttributeMapBuilder {
         this.putMultimapMap(item, attribute, modifier);
     }
 
+    public AttributeMapBuilder putMaxHealth(Item item, Double value) {
+
+        this.putMultimapMap(item, SharedMonsterAttributes.MAX_HEALTH, value);
+        return this;
+    }
+
     public AttributeMapBuilder putKnockbackResistance(Item item, Double value) {
 
         this.putMultimapMap(item, SharedMonsterAttributes.KNOCKBACK_RESISTANCE, value);
+        return this;
+    }
+
+    public AttributeMapBuilder putMovementSpeed(Item item, Double value) {
+
+        this.putMultimapMap(item, SharedMonsterAttributes.MOVEMENT_SPEED, value);
         return this;
     }
 
@@ -90,18 +103,6 @@ public class AttributeMapBuilder {
         return this;
     }
 
-    public AttributeMapBuilder putReachDistance(Item item, Double value) {
-
-        this.putMultimapMap(item, PlayerEntity.REACH_DISTANCE, value);
-        return this;
-    }
-
-    public AttributeMapBuilder putAttackReach(Item item, Double value) {
-
-        this.putMultimapMap(item, RegisterAttributeHandler.ATTACK_REACH, value);
-        return this;
-    }
-
     public AttributeMapBuilder putArmor(Item item, Double value) {
 
         this.putMultimapMap(item, SharedMonsterAttributes.ARMOR, value);
@@ -111,6 +112,36 @@ public class AttributeMapBuilder {
     public AttributeMapBuilder putArmorToughness(Item item, Double value) {
 
         this.putMultimapMap(item, SharedMonsterAttributes.ARMOR_TOUGHNESS, value);
+        return this;
+    }
+
+    public AttributeMapBuilder putLuck(Item item, Double value) {
+
+        this.putMultimapMap(item, SharedMonsterAttributes.LUCK, value);
+        return this;
+    }
+
+    public AttributeMapBuilder putSwimSpeed(Item item, Double value) {
+
+        this.putMultimapMap(item, LivingEntity.SWIM_SPEED, value);
+        return this;
+    }
+
+    public AttributeMapBuilder putGravity(Item item, Double value) {
+
+        this.putMultimapMap(item, LivingEntity.ENTITY_GRAVITY, value);
+        return this;
+    }
+
+    public AttributeMapBuilder putReachDistance(Item item, Double value) {
+
+        this.putMultimapMap(item, PlayerEntity.REACH_DISTANCE, value);
+        return this;
+    }
+
+    public AttributeMapBuilder putAttackReach(Item item, Double value) {
+
+        this.putMultimapMap(item, RegisterAttributeHandler.ATTACK_REACH, value);
         return this;
     }
 

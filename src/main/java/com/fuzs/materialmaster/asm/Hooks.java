@@ -1,7 +1,6 @@
 package com.fuzs.materialmaster.asm;
 
 import com.fuzs.materialmaster.common.RegisterAttributeHandler;
-import com.fuzs.materialmaster.config.ConfigBuildHandler;
 import com.fuzs.materialmaster.core.PropertySyncManager;
 import com.fuzs.materialmaster.core.property.AttributeItemProperty;
 import com.fuzs.materialmaster.core.property.SimpleItemProperty;
@@ -118,15 +117,6 @@ public class Hooks {
     public static int getItemEnchantability(int enchantability, ItemStack stack) {
 
         return ((SimpleItemProperty) PropertySyncManager.getInstance().getProperty("enchantability")).getValue(stack.getItem(), (double) enchantability).intValue();
-    }
-
-    /**
-     * disable container interaction range in both {@link net.minecraft.entity.player.PlayerEntity#tick}
-     * and {@link net.minecraft.entity.player.ServerPlayerEntity#tick}
-     */
-    public static boolean canInteractWith(boolean flag) {
-
-        return flag && !ConfigBuildHandler.BYPASS_CONTAINER.get();
     }
 
 }
