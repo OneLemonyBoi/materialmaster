@@ -19,12 +19,14 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 @SuppressWarnings("unused")
 public class Hooks {
 
     /**
-     * add custom attributes to an item when the attribute map is generated in {@link net.minecraft.item.Item#getAttributeModifiers}
+     * add custom attributes to an item when the attribute map is generated in {@link net.minecraft.item.ItemStack#getAttributeModifiers}
      */
     public static Multimap<String, AttributeModifier> adjustAttributeMap(Multimap<String, AttributeModifier> multimap, EquipmentSlotType equipmentSlot, ItemStack stack) {
 
@@ -41,6 +43,7 @@ public class Hooks {
      * separate attack reach from reach distance, this sets the base value
      * in {@link net.minecraft.client.renderer.GameRenderer#getMouseOver}
      */
+    @OnlyIn(Dist.CLIENT)
     public static double getAttackReachDistance() {
 
         ClientPlayerEntity player = Minecraft.getInstance().player;
@@ -57,6 +60,7 @@ public class Hooks {
      * separate attack reach from reach distance, this sets a squared value
      * in {@link net.minecraft.client.renderer.GameRenderer#getMouseOver}
      */
+    @OnlyIn(Dist.CLIENT)
     public static double getSquareAttackDistance(float partialTicks, Entity entity) {
 
         double attrib = 0.0;
@@ -77,9 +81,10 @@ public class Hooks {
      * adjust max square distance for finding a pointed entity on the client which is normally hardcoded to 9.0
      * in {@link net.minecraft.client.renderer.GameRenderer#getMouseOver}
      */
+    @OnlyIn(Dist.CLIENT)
     public static double getMaxSquareRange(double d0) {
 
-        return Math.pow(d0 * 2.0 / 3.0, 2.0);
+        return Math.pow(d0 + 0.5, 2);
     }
 
     /**
@@ -88,7 +93,7 @@ public class Hooks {
      */
     public static double getEntityReachDistance(ServerPlayerEntity player, Entity entity) {
 
-        double d0 = Math.pow(player.getAttribute(RegisterAttributeHandler.ATTACK_REACH).getValue(), 2);
+        double d0 = Math.pow(player.getAttribute(RegisterAttributeHandler.ATTACK_REACH).getValue() + 0.5, 2);
         return player.canEntityBeSeen(entity) ? d0 : d0 / 4.0;
     }
 

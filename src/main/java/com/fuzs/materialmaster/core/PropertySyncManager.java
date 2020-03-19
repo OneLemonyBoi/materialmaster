@@ -1,11 +1,9 @@
 package com.fuzs.materialmaster.core;
 
-import com.fuzs.materialmaster.MaterialMaster;
-import com.fuzs.materialmaster.config.ConfigBuildHandler;
+import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;
 import com.fuzs.materialmaster.core.property.AttributeItemProperty;
 import com.fuzs.materialmaster.core.property.ItemProperty;
 import com.fuzs.materialmaster.core.property.SimpleItemProperty;
-import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;
 import com.fuzs.materialmaster.core.provider.ConfigPropertyProvider;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

@@ -50,11 +50,11 @@ public class ConfigBuildHandler {
     static {
 
         BUILDER.push("general");
-        MIN_ATTACK_REACH = ConfigBuildHandler.BUILDER.comment("Smallest value attack reach attribute is allowed to have. Needs to be smaller than \"Attack Reach Max\". Requires a restart to apply.").defineInRange("Attack Reach Min", 0.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        MAX_ATTACK_REACH = ConfigBuildHandler.BUILDER.comment("Largest value attack reach attribute is allowed to have. Needs to be greater than \"Attack Reach Min\". Requires a restart to apply.").defineInRange("Attack Reach Max", 1024.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        MIN_ATTACK_REACH = ConfigBuildHandler.BUILDER.comment("Smallest value attack reach attribute is allowed to have. Needs to be smaller than \"Attack Reach Max\". Changes require a restart to apply.").defineInRange("Attack Reach Min", 0.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        MAX_ATTACK_REACH = ConfigBuildHandler.BUILDER.comment("Largest value attack reach attribute is allowed to have. Needs to be greater than \"Attack Reach Min\". Changes require a restart to apply.").defineInRange("Attack Reach Max", 1024.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         BUILDER.pop();
 
-        BUILDER.comment("Set default values for all attributes used by the player.\nActual range might differ with certain mods like \"AttributeFix\" installed.");
+        BUILDER.comment("Set default values for all attributes used by the player.\nActual range might differ with certain mods like \"AttributeFix\" installed. Changes require relogging to apply.");
         BUILDER.push("default_attribute_values");
         DEFAULT_MAX_HEALTH = ConfigBuildHandler.BUILDER.comment(createDescription("Amount of health when fully healed.", 0.0, 1024.0)).defineInRange("Default Max Health", 20.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         DEFAULT_KNOCKBACK_RESISTANCE = ConfigBuildHandler.BUILDER.comment(createDescription("Chance to not receive any knockback from an attack.", 0.0, 1.0)).defineInRange("Default Knockback Resistance", 0.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
@@ -67,8 +67,8 @@ public class ConfigBuildHandler {
         DEFAULT_LUCK = ConfigBuildHandler.BUILDER.comment(createDescription("Luck property when using loot tables.", -1024.0, 1024.0)).defineInRange("Default Luck", 0.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         DEFAULT_SWIM_SPEED = ConfigBuildHandler.BUILDER.comment(createDescription("Movement speed when swimming in of water.", 0.0, 1024.0)).defineInRange("Default Swim Speed", 1.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         DEFAULT_GRAVITY = ConfigBuildHandler.BUILDER.comment(createDescription("Vertical motion multiplier, mainly used when falling.", -8.0, 8.0)).defineInRange("Default Gravity", 0.08, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        DEFAULT_REACH_DISTANCE = ConfigBuildHandler.BUILDER.comment(createDescription("Distance for interacting with blocks in the world.", 0.0, 1024.0)).defineInRange("Default Reach Distance", 5.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        DEFAULT_ATTACK_REACH = ConfigBuildHandler.BUILDER.comment(createDescription("Number of blocks for interacting with entities.", 0.0, 1024.0)).defineInRange("Default Attack Reach", 5.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        DEFAULT_REACH_DISTANCE = ConfigBuildHandler.BUILDER.comment(createDescription("Distance for interacting with blocks in the world.", 0.0, 1024.0)).defineInRange("Default Reach Distance", 4.5, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        DEFAULT_ATTACK_REACH = ConfigBuildHandler.BUILDER.comment(createDescription("Number of blocks for interacting with entities.", 0.0, 1024.0)).defineInRange("Default Attack Reach", 4.5, Integer.MIN_VALUE, Integer.MAX_VALUE);
         BUILDER.pop();
 
         BUILDER.comment("Allows changing various attribute stats of items. Provided values are added to the attribute, they will not replace it.\nFor base values check defaults section of the config. Actual range might differ with certain mods like \"AttributeFix\" installed.\nFormat for every entry is \"<namespace>:<path>,<value>\". Path may use single asterisk as wildcard parameter.");
@@ -112,7 +112,7 @@ public class ConfigBuildHandler {
 
     private static String createDescription(String text, double min, double max) {
 
-        return text + "\nDefault Range: " + min + " ~ " + max;
+        return text + "\nActual Range: " + min + " ~ " + max;
     }
 
     private static String createDescription(String text, double min, double max, String condition) {

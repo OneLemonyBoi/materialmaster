@@ -1,5 +1,6 @@
 package com.fuzs.materialmaster.client;
 
+import com.fuzs.materialmaster.common.RegisterAttributeHandler;
 import com.fuzs.materialmaster.core.PropertySyncManager;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -23,6 +24,8 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameType;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -30,6 +33,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import java.util.List;
 import java.util.Map;
 
+@OnlyIn(Dist.CLIENT)
 public class ItemTooltipHandler {
 
     private final Minecraft mc = Minecraft.getInstance();
@@ -127,7 +131,18 @@ public class ItemTooltipHandler {
                     stats.replaceAll((key, value) -> {
 
                         IAttributeInstance attributeInstance = player.getAttributes().getAttributeInstanceByName(key);
-                        return attributeInstance != null ? value + attributeInstance.getBaseValue() : value;
+                        if (attributeInstance != null) {
+
+                            value += attributeInstance.getBaseValue();
+                            // reach attributes are handled differently depending on game mode
+                            if (!player.abilities.isCreativeMode && (attributeInstance.getAttribute() == PlayerEntity.REACH_DISTANCE
+                                    || attributeInstance.getAttribute() == RegisterAttributeHandler.ATTACK_REACH)) {
+
+                                value -= 0.5;
+                            }
+                        }
+
+                        return value;
                     });
 
                     if (stats.containsKey(SharedMonsterAttributes.ATTACK_DAMAGE.getName())) {
