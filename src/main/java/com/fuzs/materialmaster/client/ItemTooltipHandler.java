@@ -5,7 +5,6 @@ import com.fuzs.materialmaster.core.PropertySyncManager;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
@@ -171,7 +170,7 @@ public class ItemTooltipHandler {
         GameSettings gamesettings = this.mc.gameSettings;
         if (gamesettings.thirdPersonView == 0) {
 
-            if (this.mc.playerController.getCurrentGameType() != GameType.SPECTATOR || this.mc.ingameGUI.isTargetNamedMenuProvider(this.mc.objectMouseOver)) {
+            if (this.mc.playerController.getCurrentGameType() != GameType.SPECTATOR || this.mc.ingameGUI.func_212913_a(this.mc.objectMouseOver)) {
 
                 if (!gamesettings.showDebugInfo || gamesettings.hideGUI || this.mc.player.hasReducedDebug() || gamesettings.reducedDebugInfo) {
 
@@ -184,12 +183,12 @@ public class ItemTooltipHandler {
                             if (this.mc.player.getCooldownPeriod() < 5.0F && this.mc.pointedEntity.isAlive()) {
 
                                 this.mc.getTextureManager().bindTexture(AbstractGui.GUI_ICONS_LOCATION);
-                                RenderSystem.enableBlend();
-                                RenderSystem.enableAlphaTest();
-                                RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+                                GlStateManager.enableBlend();
+                                GlStateManager.enableAlphaTest();
+                                GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 
-                                int k = this.mc.getMainWindow().getScaledWidth() / 2 - 8;
-                                int j = this.mc.getMainWindow().getScaledHeight() / 2 - 7 + 16;
+                                int k = this.mc.mainWindow.getScaledWidth() / 2 - 8;
+                                int j = this.mc.mainWindow.getScaledHeight() / 2 - 7 + 16;
                                 AbstractGui.blit(k, j, 68, 94, 16, 16, 256, 256);
                             }
                         }

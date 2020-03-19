@@ -71,7 +71,7 @@ public class Hooks {
             attrib -= player.abilities.isCreativeMode ? 0.0F : 0.5;
         }
 
-        RayTraceResult objectMouseOver = entity.pick(attrib, partialTicks, false);
+        RayTraceResult objectMouseOver = entity.func_213324_a(attrib, partialTicks, false);
         Vec3d vec3d = entity.getEyePosition(partialTicks);
 
         return objectMouseOver.getHitVec().squareDistanceTo(vec3d);
