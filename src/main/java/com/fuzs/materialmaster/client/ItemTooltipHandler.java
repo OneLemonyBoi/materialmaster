@@ -3,8 +3,15 @@ package com.fuzs.materialmaster.client;
 import com.fuzs.materialmaster.core.PropertySyncManager;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.GameSettings;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.settings.AttackIndicatorStatus;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.CreatureAttribute;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
@@ -15,6 +22,8 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.GameType;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -22,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 
 public class ItemTooltipHandler {
+
+    private final Minecraft mc = Minecraft.getInstance();
 
     @SuppressWarnings({"unused", "ConstantConditions"})
     @SubscribeEvent
@@ -127,6 +138,46 @@ public class ItemTooltipHandler {
                     for (Map.Entry<String, Double> entry : stats.entrySet()) {
 
                         tooltip.add(realStart++, (new StringTextComponent(" ")).appendSibling(new TranslationTextComponent("attribute.modifier.equals." + AttributeModifier.Operation.ADDITION.getId(), ItemStack.DECIMALFORMAT.format(entry.getValue()), new TranslationTextComponent("attribute.name." + entry.getKey()))).applyTextStyle(TextFormatting.DARK_GREEN));
+                    }
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @SubscribeEvent
+    public void onRenderGameOverlay(RenderGameOverlayEvent.Post evt) {
+
+        if (evt.getType() != RenderGameOverlayEvent.ElementType.CROSSHAIRS || this.mc.player == null || this.mc.playerController == null) {
+
+            return;
+        }
+
+        GameSettings gamesettings = this.mc.gameSettings;
+        if (gamesettings.thirdPersonView == 0) {
+
+            if (this.mc.playerController.getCurrentGameType() != GameType.SPECTATOR || this.mc.ingameGUI.isTargetNamedMenuProvider(this.mc.objectMouseOver)) {
+
+                if (!gamesettings.showDebugInfo || gamesettings.hideGUI || this.mc.player.hasReducedDebug() || gamesettings.reducedDebugInfo) {
+
+                    if (gamesettings.attackIndicator == AttackIndicatorStatus.CROSSHAIR) {
+
+                        float f = this.mc.player.getCooledAttackStrength(0.0F);
+                        if (this.mc.pointedEntity != null && this.mc.pointedEntity instanceof LivingEntity && f >= 1.0F) {
+
+                            // show attack indicator for everything that doesn't have default attack speed (4.0)
+                            if (this.mc.player.getCooldownPeriod() < 5.0F && this.mc.pointedEntity.isAlive()) {
+
+                                this.mc.getTextureManager().bindTexture(AbstractGui.GUI_ICONS_LOCATION);
+                                RenderSystem.enableBlend();
+                                RenderSystem.enableAlphaTest();
+                                RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+
+                                int k = this.mc.getMainWindow().getScaledWidth() / 2 - 8;
+                                int j = this.mc.getMainWindow().getScaledHeight() / 2 - 7 + 16;
+                                AbstractGui.blit(k, j, 68, 94, 16, 16, 256, 256);
+                            }
+                        }
                     }
                 }
             }

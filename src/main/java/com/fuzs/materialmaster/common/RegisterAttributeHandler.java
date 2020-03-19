@@ -13,7 +13,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class RegisterAttributeHandler {
 
-    public static final IAttribute ATTACK_REACH = new RangedAttribute(null,  MaterialMaster.MODID + ".attackReach", 5.0, 0.0, 1024.0).setShouldWatch(true);
+    public static final IAttribute ATTACK_REACH = new RangedAttribute(null,  MaterialMaster.MODID + ".attackReach", 5.0, ConfigBuildHandler.MIN_ATTACK_REACH.get(), ConfigBuildHandler.MAX_ATTACK_REACH.get()).setShouldWatch(true);
 
     @SuppressWarnings("unused")
     @SubscribeEvent

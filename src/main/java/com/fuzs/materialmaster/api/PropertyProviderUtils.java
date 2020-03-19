@@ -2,10 +2,14 @@ package com.fuzs.materialmaster.api;
 
 import com.fuzs.materialmaster.api.builder.EntryCollectionBuilder;
 import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;
+import com.fuzs.materialmaster.common.RegisterAttributeHandler;
 import com.fuzs.materialmaster.core.PropertySyncManager;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ai.attributes.IAttribute;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
 import net.minecraft.potion.Effect;
@@ -15,6 +19,21 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 @SuppressWarnings("unused")
 public class PropertyProviderUtils {
+
+    public static IAttribute getAttackReachAttribute() {
+
+        return RegisterAttributeHandler.ATTACK_REACH;
+    }
+
+    public static IAttributeInstance getAttackReachForPlayer(PlayerEntity player) {
+
+        return player.getAttribute(RegisterAttributeHandler.ATTACK_REACH);
+    }
+
+    public static double getAttackReachFromPlayer(PlayerEntity player) {
+
+        return player.getAttribute(RegisterAttributeHandler.ATTACK_REACH).getValue();
+    }
 
     public static void registerProvider(AbstractPropertyProvider provider) {
 

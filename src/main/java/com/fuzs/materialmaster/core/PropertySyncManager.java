@@ -1,5 +1,6 @@
 package com.fuzs.materialmaster.core;
 
+import com.fuzs.materialmaster.MaterialMaster;
 import com.fuzs.materialmaster.config.ConfigBuildHandler;
 import com.fuzs.materialmaster.core.property.AttributeItemProperty;
 import com.fuzs.materialmaster.core.property.ItemProperty;
@@ -87,7 +88,8 @@ public class PropertySyncManager {
     // config reload event handler
     public void onModConfig(final ModConfig.ModConfigEvent evt) {
 
-        if (evt.getConfig().getSpec() == ConfigBuildHandler.SPEC) {
+        if (this.getProviders().stream().map(AbstractPropertyProvider::getName)
+                .anyMatch(name -> name.equals(evt.getConfig().getModId()))) {
 
             this.sync();
         }

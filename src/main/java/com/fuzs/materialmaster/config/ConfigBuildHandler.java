@@ -10,6 +10,9 @@ public class ConfigBuildHandler {
 
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
+    public static final ForgeConfigSpec.DoubleValue MIN_ATTACK_REACH;
+    public static final ForgeConfigSpec.DoubleValue MAX_ATTACK_REACH;
+
     public static final ForgeConfigSpec.DoubleValue DEFAULT_MAX_HEALTH;
     public static final ForgeConfigSpec.DoubleValue DEFAULT_KNOCKBACK_RESISTANCE;
     public static final ForgeConfigSpec.DoubleValue DEFAULT_MOVEMENT_SPEED;
@@ -46,38 +49,43 @@ public class ConfigBuildHandler {
 
     static {
 
-        BUILDER.comment("Set default values for all attributes used by this mod.\nActual default range might differ with certain mods like \"AttributeFix\" installed.");
+        BUILDER.push("general");
+        MIN_ATTACK_REACH = ConfigBuildHandler.BUILDER.comment("Smallest value attack reach attribute is allowed to have. Needs to be smaller than \"Attack Reach Max\". Requires a restart to apply.").defineInRange("Attack Reach Min", 0.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        MAX_ATTACK_REACH = ConfigBuildHandler.BUILDER.comment("Largest value attack reach attribute is allowed to have. Needs to be greater than \"Attack Reach Min\". Requires a restart to apply.").defineInRange("Attack Reach Max", 1024.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        BUILDER.pop();
+
+        BUILDER.comment("Set default values for all attributes used by the player.\nActual range might differ with certain mods like \"AttributeFix\" installed.");
         BUILDER.push("default_attribute_values");
         DEFAULT_MAX_HEALTH = ConfigBuildHandler.BUILDER.comment(createDescription("Amount of health when fully healed.", 0.0, 1024.0)).defineInRange("Default Max Health", 20.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         DEFAULT_KNOCKBACK_RESISTANCE = ConfigBuildHandler.BUILDER.comment(createDescription("Chance to not receive any knockback from an attack.", 0.0, 1.0)).defineInRange("Default Knockback Resistance", 0.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        DEFAULT_MOVEMENT_SPEED = ConfigBuildHandler.BUILDER.comment(createDescription("Movement speed outside of water.", 0.0, 1024.0)).defineInRange("Default Movement Speed", 0.1, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        DEFAULT_MOVEMENT_SPEED = ConfigBuildHandler.BUILDER.comment(createDescription("Movement speed when walking on land.", 0.0, 1024.0)).defineInRange("Default Movement Speed", 0.1, Integer.MIN_VALUE, Integer.MAX_VALUE);
         DEFAULT_ATTACK_DAMAGE = ConfigBuildHandler.BUILDER.comment(createDescription("Amount of melee damage dealt when fighting.", 0.0, 2048.0)).defineInRange("Default Attack Damage", 1.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        DEFAULT_ATTACK_KNOCKBACK = ConfigBuildHandler.BUILDER.comment(createDescription("Amount of knockback dealt when hitting an entity.", 0.0, 5.0)).defineInRange("Default Attack Knockback", 0.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        DEFAULT_ATTACK_SPEED = ConfigBuildHandler.BUILDER.comment(createDescription("Speed at which attack cooldown recharges, higher values make it recharge faster.", 0.0, 1024.0)).defineInRange("Default Attack Speed", 4.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        DEFAULT_ATTACK_KNOCKBACK = ConfigBuildHandler.BUILDER.comment(createDescription("How much knockback is dealt when hitting an entity.", 0.0, 5.0)).defineInRange("Default Attack Knockback", 0.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        DEFAULT_ATTACK_SPEED = ConfigBuildHandler.BUILDER.comment(createDescription("Speed at which the attack cooldown recharges, higher values make it recharge faster.", 0.0, 1024.0)).defineInRange("Default Attack Speed", 4.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         DEFAULT_ARMOR = ConfigBuildHandler.BUILDER.comment(createDescription("Amount of armor protection.", 0.0, 30.0)).defineInRange("Default Armor", 0.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         DEFAULT_ARMOR_TOUGHNESS = ConfigBuildHandler.BUILDER.comment(createDescription("Amount of armor toughness.", 0.0, 20.0)).defineInRange("Default Armor Toughness", 0.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         DEFAULT_LUCK = ConfigBuildHandler.BUILDER.comment(createDescription("Luck property when using loot tables.", -1024.0, 1024.0)).defineInRange("Default Luck", 0.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        DEFAULT_SWIM_SPEED = ConfigBuildHandler.BUILDER.comment(createDescription("Movement speed inside of water.", 0.0, 1024.0)).defineInRange("Default Swim Speed", 1.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        DEFAULT_SWIM_SPEED = ConfigBuildHandler.BUILDER.comment(createDescription("Movement speed when swimming in of water.", 0.0, 1024.0)).defineInRange("Default Swim Speed", 1.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         DEFAULT_GRAVITY = ConfigBuildHandler.BUILDER.comment(createDescription("Vertical motion multiplier, mainly used when falling.", -8.0, 8.0)).defineInRange("Default Gravity", 0.08, Integer.MIN_VALUE, Integer.MAX_VALUE);
         DEFAULT_REACH_DISTANCE = ConfigBuildHandler.BUILDER.comment(createDescription("Distance for interacting with blocks in the world.", 0.0, 1024.0)).defineInRange("Default Reach Distance", 5.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         DEFAULT_ATTACK_REACH = ConfigBuildHandler.BUILDER.comment(createDescription("Number of blocks for interacting with entities.", 0.0, 1024.0)).defineInRange("Default Attack Reach", 5.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         BUILDER.pop();
 
-        BUILDER.comment("Allows changing various attribute stats of items. Provided values are added to the attribute, they will not replace it.\nFor base values check defaults section of the config. Actual default range might differ with certain mods like \"AttributeFix\" installed.\nFormat for every entry is \"<namespace>:<path>,<value>\". Path may use single asterisk as wildcard parameter.");
+        BUILDER.comment("Allows changing various attribute stats of items. Provided values are added to the attribute, they will not replace it.\nFor base values check defaults section of the config. Actual range might differ with certain mods like \"AttributeFix\" installed.\nFormat for every entry is \"<namespace>:<path>,<value>\". Path may use single asterisk as wildcard parameter.");
         BUILDER.push("attribute_item_stats");
         MAX_HEALTH = ConfigBuildHandler.BUILDER.comment(createDescription("Amount of health when fully healed.", 0.0, 1024.0)).define("Max Health List", Lists.newArrayList());
         KNOCKBACK_RESISTANCE = ConfigBuildHandler.BUILDER.comment(createDescription("Chance to not receive any knockback from an attack.", 0.0, 1.0)).define("Knockback Resistance List", Lists.newArrayList());
-        MOVEMENT_SPEED = ConfigBuildHandler.BUILDER.comment(createDescription("Movement speed outside of water.", 0.0, 1024.0)).define("Movement Speed List", Lists.newArrayList());
-        ATTACK_DAMAGE = ConfigBuildHandler.BUILDER.comment(createDescription("How much melee damage is dealt when fighting.", 0.0, 2048.0)).define("Attack Damage List", Lists.newArrayList());
+        MOVEMENT_SPEED = ConfigBuildHandler.BUILDER.comment(createDescription("Movement speed when walking on land.", 0.0, 1024.0)).define("Movement Speed List", Lists.newArrayList());
+        ATTACK_DAMAGE = ConfigBuildHandler.BUILDER.comment(createDescription("Amount of melee damage dealt when fighting.", 0.0, 2048.0)).define("Attack Damage List", Lists.newArrayList());
         ATTACK_KNOCKBACK = ConfigBuildHandler.BUILDER.comment(createDescription("How much knockback is dealt when hitting an entity.", 0.0, 5.0)).define("Attack Knockback List", Lists.newArrayList());
-        ATTACK_SPEED = ConfigBuildHandler.BUILDER.comment(createDescription("Speed at which the attack cooldown recharges. Higher values make it recharge faster.", 0.0, 1024.0)).define("Attack Speed List", Lists.newArrayList());
+        ATTACK_SPEED = ConfigBuildHandler.BUILDER.comment(createDescription("Speed at which the attack cooldown recharges, higher values make it recharge faster.", 0.0, 1024.0)).define("Attack Speed List", Lists.newArrayList());
         ARMOR = ConfigBuildHandler.BUILDER.comment(createDescription("Amount of armor protection.", 0.0, 30.0)).define("Armor List", Lists.newArrayList());
         ARMOR_TOUGHNESS = ConfigBuildHandler.BUILDER.comment(createDescription("Amount of armor toughness.", 0.0, 20.0)).define("Armor Toughness List", Lists.newArrayList());
         LUCK = ConfigBuildHandler.BUILDER.comment(createDescription("Luck property when using loot tables.", -1024.0, 1024.0)).define("Luck List", Lists.newArrayList());
-        SWIM_SPEED = ConfigBuildHandler.BUILDER.comment(createDescription("Movement speed inside of water.", 0.0, 1024.0)).define("Swim Speed List", Lists.newArrayList());
+        SWIM_SPEED = ConfigBuildHandler.BUILDER.comment(createDescription("Movement speed when swimming in of water.", 0.0, 1024.0)).define("Swim Speed List", Lists.newArrayList());
         GRAVITY = ConfigBuildHandler.BUILDER.comment(createDescription("Vertical motion multiplier, mainly used when falling.", -8.0, 8.0)).define("Gravity List", Lists.newArrayList());
-        REACH_DISTANCE = ConfigBuildHandler.BUILDER.comment(createDescription("Number of blocks it is possible to interact with the world from.", 0.0, 1024.0)).define("Reach Distance List", Lists.newArrayList());
-        ATTACK_REACH = ConfigBuildHandler.BUILDER.comment(createDescription("From how many blocks away it is possible to interact with entities.", 0.0, 1024.0)).define("Attack Reach List", Lists.newArrayList());
+        REACH_DISTANCE = ConfigBuildHandler.BUILDER.comment(createDescription("Distance for interacting with blocks in the world.", 0.0, 1024.0)).define("Reach Distance List", Lists.newArrayList());
+        ATTACK_REACH = ConfigBuildHandler.BUILDER.comment(createDescription("Number of blocks for interacting with entities.", 0.0, 1024.0)).define("Attack Reach List", Lists.newArrayList());
         BUILDER.pop();
 
         BUILDER.comment("Allows changing various property stats of items.\nFormat for every entry is \"<namespace>:<path>,<value>\". Path may use single asterisk as wildcard parameter.");

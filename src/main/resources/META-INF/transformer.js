@@ -123,6 +123,23 @@ function initializeCoreMod() {
                 }], classNode, "Item");
                 return classNode;
             }
+        },
+
+        // show attack indicator for everything that doesn't have default attack speed (4.0)
+        'ingame_gui_patch': {
+            'target': {
+                'type': 'CLASS',
+                'name': 'net.minecraft.client.gui.IngameGui'
+            },
+            'transformer': function(classNode) {
+                patchMethod([{
+                    obfName: "func_194798_c",
+                    name: "renderAttackIndicator",
+                    desc: "()V",
+                    patches: [patchIngameGuiRenderAttackIndicator]
+                }], classNode, "IngameGui");
+                return classNode;
+            }
         }
     };
 }
@@ -182,6 +199,27 @@ function patchInstructions(method, filter, action, obfuscated) {
         return true;
     }
 }
+
+var patchIngameGuiRenderAttackIndicator = {
+    filter: function(node, obfuscated) {
+        if (matchesMethod(node, "net/minecraft/client/entity/player/ClientPlayerEntity", obfuscated ? "func_184818_cX" : "getCooldownPeriod", "()F")) {
+            var nextNode = node.getNext();
+            if (nextNode instanceof LdcInsnNode) {
+                nextNode = nextNode.getNext();
+                if (nextNode instanceof InsnNode && nextNode.getOpcode().equals(Opcodes.FCMPL)) {
+                    nextNode = nextNode.getNext();
+                    if (nextNode instanceof JumpInsnNode && nextNode.getOpcode().equals(Opcodes.IFLE)) {
+                        return nextNode;
+                    }
+                }
+            }
+        }
+    },
+    action: function(node, instructions, obfuscated) {
+        // switches '>' with '!='
+        node.setOpcode(Opcodes.IFEQ);
+    }
+};
 
 var patchItemGetHarvestLevel = {
     filter: function(node, obfuscated) {
