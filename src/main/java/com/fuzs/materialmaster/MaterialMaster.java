@@ -1,9 +1,11 @@
 package com.fuzs.materialmaster;
 
-import com.fuzs.materialmaster.client.ItemTooltipHandler;
-import com.fuzs.materialmaster.common.DigSpeedHandler;
-import com.fuzs.materialmaster.common.RegisterAttributeHandler;
+import com.fuzs.materialmaster.api.PropertyProviderUtils;
+import com.fuzs.materialmaster.client.handler.ItemTooltipHandler;
+import com.fuzs.materialmaster.common.handler.DigSpeedHandler;
+import com.fuzs.materialmaster.common.handler.RegisterAttributeHandler;
 import com.fuzs.materialmaster.config.ConfigBuildHandler;
+import com.fuzs.materialmaster.core.ModSyncManager;
 import com.fuzs.materialmaster.core.PropertySyncManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -31,11 +33,13 @@ public class MaterialMaster {
 
         // config setup
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigBuildHandler.SPEC, MODID + ".toml");
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(ModSyncManager.getInstance()::onModConfig);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(PropertySyncManager.getInstance()::onModConfig);
     }
 
     private void onCommonSetup(final FMLCommonSetupEvent evt) {
 
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(PropertySyncManager.getInstance()::onModConfig);
+        ModSyncManager.getInstance().processModProviders();
         MinecraftForge.EVENT_BUS.register(new RegisterAttributeHandler());
         MinecraftForge.EVENT_BUS.register(new DigSpeedHandler());
     }

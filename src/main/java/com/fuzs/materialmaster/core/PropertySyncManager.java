@@ -1,18 +1,17 @@
 package com.fuzs.materialmaster.core;
 
+import com.fuzs.materialmaster.MaterialMaster;
 import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;
 import com.fuzs.materialmaster.core.property.AttributeItemProperty;
 import com.fuzs.materialmaster.core.property.ItemProperty;
 import com.fuzs.materialmaster.core.property.SimpleItemProperty;
 import com.fuzs.materialmaster.core.provider.ConfigPropertyProvider;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.config.ModConfig;
 
-import javax.annotation.Nonnull;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -20,30 +19,30 @@ import java.util.stream.Collectors;
 
 public class PropertySyncManager {
 
-    private static final PropertySyncManager INSTANCE = new PropertySyncManager();
+    private static final PropertySyncManager INSTANCE = new PropertySyncManager(new ConfigPropertyProvider());
 
-    private final List<AbstractPropertyProvider> providers = Lists.newArrayList();
-    private final Map<String, ItemProperty<?>> properties = Maps.newHashMap();
-    private final ConfigPropertyProvider defaultProperties = new ConfigPropertyProvider();
+    private final Map<AbstractPropertyProvider, String> providers = Maps.newHashMap();
+    private final Map<PropertyType, ItemProperty<?>> properties = Maps.newHashMap();
+    private final AbstractPropertyProvider defaultProperties;
     private final Set<UUID> knownAttributeIds = Sets.newHashSet();
 
-    private PropertySyncManager() {
+    private PropertySyncManager(AbstractPropertyProvider defaultProperties) {
 
-        this.properties.put("attributes", new AttributeItemProperty("Attributes", AbstractPropertyProvider::getAttributes));
-        this.properties.put("stack_size", new SimpleItemProperty("Stack Size", AbstractPropertyProvider::getStackSize, 0.0, 64.0, item -> !item.isDamageable(), "Has durability"));
-        this.properties.put("durability", new SimpleItemProperty("Durability", AbstractPropertyProvider::getDurability, Item::isDamageable, "Not damageable"));
-        this.properties.put("dig_speed", new SimpleItemProperty("Dig Speed", AbstractPropertyProvider::getDigSpeed));
-        this.properties.put("harvest_level", new SimpleItemProperty("Harvest Level", AbstractPropertyProvider::getHarvestLevel, -1.0, Integer.MAX_VALUE, item -> !item.getToolTypes(null).isEmpty(), "No tool"));
-        this.properties.put("enchantability", new SimpleItemProperty("Enchantability", AbstractPropertyProvider::getEnchantability, item -> item.getItemEnchantability() > 0, "Not enchantable"));
+        this.defaultProperties = defaultProperties;
+        this.properties.put(PropertyType.ATTRIBUTES, new AttributeItemProperty("Attributes", AbstractPropertyProvider::getAttributes));
+        this.properties.put(PropertyType.STACK_SIZE, new SimpleItemProperty("Stack Size", AbstractPropertyProvider::getStackSize, 0.0, 64.0, item -> !item.isDamageable(), "Has durability"));
+        this.properties.put(PropertyType.DURABILTY, new SimpleItemProperty("Durability", AbstractPropertyProvider::getDurability, Item::isDamageable, "Not damageable"));
+        this.properties.put(PropertyType.DIG_SPEED, new SimpleItemProperty("Dig Speed", AbstractPropertyProvider::getDigSpeed));
+        this.properties.put(PropertyType.HARVEST_LEVEL, new SimpleItemProperty("Harvest Level", AbstractPropertyProvider::getHarvestLevel, -1.0, Integer.MAX_VALUE, item -> !item.getToolTypes(null).isEmpty(), "No tool"));
+        this.properties.put(PropertyType.ENCHANTABILITY, new SimpleItemProperty("Enchantability", AbstractPropertyProvider::getEnchantability, item -> item.getItemEnchantability() > 0, "Not enchantable"));
     }
 
-    public void registerProvider(AbstractPropertyProvider provider) {
+    public void registerPropertyProvider(String modid, AbstractPropertyProvider provider) {
 
-        this.providers.add(provider);
+        this.providers.put(provider, modid);
     }
 
-    @Nonnull
-    public ItemProperty<?> getProperty(String id) {
+    public ItemProperty<?> getProperty(PropertyType id) {
 
         return this.properties.get(id);
     }
@@ -53,27 +52,31 @@ public class PropertySyncManager {
         return this.knownAttributeIds.contains(attributeId);
     }
 
-    private List<AbstractPropertyProvider> getProviders() {
+    private Map<AbstractPropertyProvider, String> getProviders() {
 
-        List<AbstractPropertyProvider> providers = this.providers.stream().filter(AbstractPropertyProvider::isEnabled).collect(Collectors.toList());
-        providers.add(this.defaultProperties);
+        Map<AbstractPropertyProvider, String> providers = this.providers.entrySet().stream()
+                .filter(entry -> entry.getKey().isEnabled())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        // use linked hash map so default properties are always applied last
+                        (u, v) -> { throw new IllegalStateException(String.format("Duplicate key %s", u)); }, LinkedHashMap::new));
+        providers.put(this.defaultProperties, MaterialMaster.MODID);
 
         return providers;
     }
 
     @SuppressWarnings("RedundantCast")
-    private void sync() {
+    public void sync() {
 
         this.properties.values().forEach(ItemProperty::clear);
-        List<AbstractPropertyProvider> providers = this.getProviders();
+        Set<AbstractPropertyProvider> providers = this.getProviders().keySet();
         this.properties.values().forEach(property -> providers.forEach(property::addPropertiesFromProvider));
         this.syncKnownAttributeIds(providers);
 
-        ((SimpleItemProperty) this.getProperty("stack_size")).forEach((item, value) -> item.maxStackSize = value.intValue());
-        ((SimpleItemProperty) this.getProperty("durability")).forEach((item, value) -> item.maxDamage = value.intValue());
+        ((SimpleItemProperty) this.getProperty(PropertyType.STACK_SIZE)).forEach((item, value) -> item.maxStackSize = value.intValue());
+        ((SimpleItemProperty) this.getProperty(PropertyType.DURABILTY)).forEach((item, value) -> item.maxDamage = value.intValue());
     }
 
-    private void syncKnownAttributeIds(List<AbstractPropertyProvider> providers) {
+    private void syncKnownAttributeIds(Set<AbstractPropertyProvider> providers) {
 
         this.knownAttributeIds.clear();
         providers.forEach(provider -> this.knownAttributeIds.addAll(provider.getAttributeIds()));
@@ -83,11 +86,10 @@ public class PropertySyncManager {
         this.knownAttributeIds.add(UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3"));
     }
 
-    // config reload event handler
+    // config event handler
     public void onModConfig(final ModConfig.ModConfigEvent evt) {
 
-        if (this.getProviders().stream().map(AbstractPropertyProvider::getName)
-                .anyMatch(name -> name.equals(evt.getConfig().getModId()))) {
+        if (this.getProviders().containsValue(evt.getConfig().getModId())) {
 
             this.sync();
         }
@@ -96,6 +98,11 @@ public class PropertySyncManager {
     public static PropertySyncManager getInstance() {
 
         return INSTANCE;
+    }
+
+    public enum PropertyType {
+
+        ATTRIBUTES, STACK_SIZE, DURABILTY, DIG_SPEED, HARVEST_LEVEL, ENCHANTABILITY
     }
 
 }

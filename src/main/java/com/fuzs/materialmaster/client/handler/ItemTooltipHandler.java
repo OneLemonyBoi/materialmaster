@@ -1,6 +1,6 @@
-package com.fuzs.materialmaster.client;
+package com.fuzs.materialmaster.client.handler;
 
-import com.fuzs.materialmaster.common.RegisterAttributeHandler;
+import com.fuzs.materialmaster.common.handler.RegisterAttributeHandler;
 import com.fuzs.materialmaster.core.PropertySyncManager;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -126,33 +126,39 @@ public class ItemTooltipHandler {
 
                 }
 
-                if (player != null && !stats.isEmpty()) {
+                if (!stats.isEmpty()) {
 
-                    stats.replaceAll((key, value) -> {
+                    if (player != null) {
 
-                        IAttributeInstance attributeInstance = player.getAttributes().getAttributeInstanceByName(key);
-                        if (attributeInstance != null) {
+                        stats.replaceAll((name, value) -> {
 
-                            value += attributeInstance.getBaseValue();
-                            // reach attributes are handled differently depending on game mode
-                            if (!player.abilities.isCreativeMode && (attributeInstance.getAttribute() == PlayerEntity.REACH_DISTANCE
-                                    || attributeInstance.getAttribute() == RegisterAttributeHandler.ATTACK_REACH)) {
+                            IAttributeInstance attributeInstance = player.getAttributes().getAttributeInstanceByName(name);
+                            if (attributeInstance != null) {
 
-                                value -= 0.5;
+                                value += attributeInstance.getBaseValue();
+                                // reach attributes are handled differently depending on game mode
+                                if (!player.abilities.isCreativeMode && (attributeInstance.getAttribute() == PlayerEntity.REACH_DISTANCE
+                                        || attributeInstance.getAttribute() == RegisterAttributeHandler.ATTACK_REACH)) {
+
+                                    value -= 0.5;
+                                }
+
+                                if (attributeInstance.getAttribute() == SharedMonsterAttributes.ATTACK_DAMAGE) {
+
+                                    value += EnchantmentHelper.getModifierForCreature(stack, CreatureAttribute.UNDEFINED);
+                                }
                             }
-                        }
 
-                        return value;
-                    });
-
-                    if (stats.containsKey(SharedMonsterAttributes.ATTACK_DAMAGE.getName())) {
-
-                        stats.merge(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), (double) EnchantmentHelper.getModifierForCreature(stack, CreatureAttribute.UNDEFINED), Double::sum);
+                            return value;
+                        });
                     }
 
                     for (Map.Entry<String, Double> entry : stats.entrySet()) {
 
                         tooltip.add(realStart++, (new StringTextComponent(" ")).appendSibling(new TranslationTextComponent("attribute.modifier.equals." + AttributeModifier.Operation.ADDITION.getId(), ItemStack.DECIMALFORMAT.format(entry.getValue()), new TranslationTextComponent("attribute.name." + entry.getKey()))).applyTextStyle(TextFormatting.DARK_GREEN));
+                        // need to update start as well as everything is shifted by inserting somewhere in the middle
+                        // value might be needed again for another equipment slot
+                        start++;
                     }
                 }
             }

@@ -1,7 +1,7 @@
 package com.fuzs.materialmaster.api.builder;
 
 import com.fuzs.materialmaster.MaterialMaster;
-import com.fuzs.materialmaster.common.RegisterAttributeHandler;
+import com.fuzs.materialmaster.common.handler.RegisterAttributeHandler;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -12,7 +12,6 @@ import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 
 import java.util.Map;
 import java.util.UUID;
@@ -56,11 +55,6 @@ public class AttributeMapBuilder {
     }
 
     private void putMultimapMap(Item item, IAttribute attribute, Double value) {
-
-        if (attribute.clampValue(value) != value) {
-
-            MaterialMaster.LOGGER.warn("Attribute \"" + attribute.getName() + "\" for item \"" + item.getDisplayName(ItemStack.EMPTY).getUnformattedComponentText() + "\" is out of bounds: " + attribute.clampValue(value) + " != " + value);
-        }
 
         UUID id = item instanceof ArmorItem ? this.armorModifierIds[((ArmorItem) item).getEquipmentSlot().getIndex()] : this.mainhandModifierId;
         AttributeModifier modifier = new AttributeModifier(id, MaterialMaster.NAME + " modifier", value, AttributeModifier.Operation.ADDITION);

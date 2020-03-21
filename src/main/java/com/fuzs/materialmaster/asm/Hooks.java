@@ -1,6 +1,6 @@
 package com.fuzs.materialmaster.asm;
 
-import com.fuzs.materialmaster.common.RegisterAttributeHandler;
+import com.fuzs.materialmaster.common.handler.RegisterAttributeHandler;
 import com.fuzs.materialmaster.core.PropertySyncManager;
 import com.fuzs.materialmaster.core.property.AttributeItemProperty;
 import com.fuzs.materialmaster.core.property.SimpleItemProperty;
@@ -31,9 +31,12 @@ public class Hooks {
     public static Multimap<String, AttributeModifier> adjustAttributeMap(Multimap<String, AttributeModifier> multimap, EquipmentSlotType equipmentSlot, ItemStack stack) {
 
         // handle armor differently
-        if ((!(stack.getItem() instanceof ArmorItem) && equipmentSlot == EquipmentSlotType.MAINHAND || stack.getItem() instanceof ArmorItem && ((ArmorItem) stack.getItem()).getEquipmentSlot() == equipmentSlot)) {
+        if ((!(stack.getItem() instanceof ArmorItem) && equipmentSlot == EquipmentSlotType.MAINHAND
+                || stack.getItem() instanceof ArmorItem && ((ArmorItem) stack.getItem()).getEquipmentSlot() == equipmentSlot)) {
 
-            multimap.putAll(((AttributeItemProperty) PropertySyncManager.getInstance().getProperty("attributes")).getValue(stack.getItem(), HashMultimap.create()));
+            multimap.putAll(((AttributeItemProperty) PropertySyncManager.getInstance()
+                    .getProperty(PropertySyncManager.PropertyType.ATTRIBUTES))
+                    .getValue(stack.getItem(), HashMultimap.create()));
         }
 
         return multimap;
@@ -112,7 +115,9 @@ public class Hooks {
      */
     public static int getHarvestLevel(int toolLevel, Item item) {
 
-        return toolLevel != -1 ? ((SimpleItemProperty) PropertySyncManager.getInstance().getProperty("harvest_level")).getValue(item, (double) toolLevel).intValue() : toolLevel;
+        return toolLevel != -1 ? ((SimpleItemProperty) PropertySyncManager.getInstance()
+                .getProperty(PropertySyncManager.PropertyType.HARVEST_LEVEL))
+                .getValue(item, (double) toolLevel).intValue() : toolLevel;
     }
 
     /**
@@ -121,7 +126,9 @@ public class Hooks {
      */
     public static int getItemEnchantability(int enchantability, ItemStack stack) {
 
-        return ((SimpleItemProperty) PropertySyncManager.getInstance().getProperty("enchantability")).getValue(stack.getItem(), (double) enchantability).intValue();
+        return ((SimpleItemProperty) PropertySyncManager.getInstance()
+                .getProperty(PropertySyncManager.PropertyType.ENCHANTABILITY))
+                .getValue(stack.getItem(), (double) enchantability).intValue();
     }
 
 }

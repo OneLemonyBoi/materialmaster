@@ -2,7 +2,8 @@ package com.fuzs.materialmaster.api;
 
 import com.fuzs.materialmaster.api.builder.EntryCollectionBuilder;
 import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;
-import com.fuzs.materialmaster.common.RegisterAttributeHandler;
+import com.fuzs.materialmaster.common.handler.RegisterAttributeHandler;
+import com.fuzs.materialmaster.core.ModSyncManager;
 import com.fuzs.materialmaster.core.PropertySyncManager;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
@@ -15,6 +16,7 @@ import net.minecraft.item.Item;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.Potion;
 import net.minecraft.world.biome.Biome;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 
 @SuppressWarnings("unused")
@@ -35,9 +37,15 @@ public class PropertyProviderUtils {
         return player.getAttribute(RegisterAttributeHandler.ATTACK_REACH).getValue();
     }
 
+    @Deprecated
     public static void registerProvider(AbstractPropertyProvider provider) {
 
-        PropertySyncManager.getInstance().registerProvider(provider);
+        PropertySyncManager.getInstance().registerPropertyProvider(ModLoadingContext.get().getActiveContainer().getModId(), provider);
+    }
+
+    public static void registerModProvider() {
+
+        ModSyncManager.getInstance().registerModProvider();
     }
 
     public static EntryCollectionBuilder<Block> createBlockBuilder() {
