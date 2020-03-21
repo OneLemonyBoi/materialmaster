@@ -2,7 +2,7 @@ package com.fuzs.materialmaster.api;
 
 import com.fuzs.materialmaster.api.builder.EntryCollectionBuilder;
 import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;
-import com.fuzs.materialmaster.common.RegisterAttributeHandler;
+import com.fuzs.materialmaster.common.handler.RegisterAttributeHandler;
 import com.fuzs.materialmaster.core.PropertySyncManager;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;

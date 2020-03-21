@@ -1,4 +1,4 @@
-package com.fuzs.materialmaster.common;
+package com.fuzs.materialmaster.common.handler;
 
 import com.fuzs.materialmaster.MaterialMaster;
 import com.fuzs.materialmaster.config.ConfigBuildHandler;

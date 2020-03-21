@@ -1,6 +1,6 @@
 package com.fuzs.materialmaster.asm;
 
-import com.fuzs.materialmaster.common.RegisterAttributeHandler;
+import com.fuzs.materialmaster.common.handler.RegisterAttributeHandler;
 import com.fuzs.materialmaster.core.PropertySyncManager;
 import com.fuzs.materialmaster.core.property.AttributeItemProperty;
 import com.fuzs.materialmaster.core.property.SimpleItemProperty;

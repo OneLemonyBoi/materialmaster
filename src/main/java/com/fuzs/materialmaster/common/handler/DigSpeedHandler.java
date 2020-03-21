@@ -1,4 +1,4 @@
-package com.fuzs.materialmaster.common;
+package com.fuzs.materialmaster.common.handler;
 
 import com.fuzs.materialmaster.core.PropertySyncManager;
 import com.fuzs.materialmaster.core.property.SimpleItemProperty;

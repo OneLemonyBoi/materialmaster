@@ -1,8 +1,8 @@
 package com.fuzs.materialmaster;
 
-import com.fuzs.materialmaster.client.ItemTooltipHandler;
-import com.fuzs.materialmaster.common.DigSpeedHandler;
-import com.fuzs.materialmaster.common.RegisterAttributeHandler;
+import com.fuzs.materialmaster.client.handler.ItemTooltipHandler;
+import com.fuzs.materialmaster.common.handler.DigSpeedHandler;
+import com.fuzs.materialmaster.common.handler.RegisterAttributeHandler;
 import com.fuzs.materialmaster.config.ConfigBuildHandler;
 import com.fuzs.materialmaster.core.PropertySyncManager;
 import net.minecraftforge.common.MinecraftForge;
