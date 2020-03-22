@@ -2,13 +2,12 @@ package com.fuzs.materialmaster.core;
 
 import com.fuzs.materialmaster.MaterialMaster;
 import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;
-import com.fuzs.materialmaster.core.property.AttributeItemProperty;
-import com.fuzs.materialmaster.core.property.ItemProperty;
-import com.fuzs.materialmaster.core.property.SimpleItemProperty;
 import com.fuzs.materialmaster.core.provider.ConfigPropertyProvider;
+import com.fuzs.materialmaster.core.storage.AttributeItemProperty;
+import com.fuzs.materialmaster.core.storage.ItemProperty;
+import com.fuzs.materialmaster.core.storage.SimpleItemProperty;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import net.minecraft.item.Item;
 import net.minecraftforge.fml.config.ModConfig;
 
 import java.util.LinkedHashMap;
@@ -29,12 +28,13 @@ public class PropertySyncManager {
     private PropertySyncManager(AbstractPropertyProvider defaultProperties) {
 
         this.defaultProperties = defaultProperties;
+        // removed precondition tests since new values might be set to no longer match them causing confusing errors to be logged
         this.properties.put(PropertyType.ATTRIBUTES, new AttributeItemProperty("Attributes", AbstractPropertyProvider::getAttributes));
-        this.properties.put(PropertyType.STACK_SIZE, new SimpleItemProperty("Stack Size", AbstractPropertyProvider::getStackSize, 0.0, 64.0, item -> !item.isDamageable(), "Has durability"));
-        this.properties.put(PropertyType.DURABILTY, new SimpleItemProperty("Durability", AbstractPropertyProvider::getDurability, Item::isDamageable, "Not damageable"));
+        this.properties.put(PropertyType.STACK_SIZE, new SimpleItemProperty("Stack Size", AbstractPropertyProvider::getStackSize, 0.0, 64.0));
+        this.properties.put(PropertyType.DURABILTY, new SimpleItemProperty("Durability", AbstractPropertyProvider::getDurability));
         this.properties.put(PropertyType.DIG_SPEED, new SimpleItemProperty("Dig Speed", AbstractPropertyProvider::getDigSpeed));
         this.properties.put(PropertyType.HARVEST_LEVEL, new SimpleItemProperty("Harvest Level", AbstractPropertyProvider::getHarvestLevel, -1.0, Integer.MAX_VALUE, item -> !item.getToolTypes(null).isEmpty(), "No tool"));
-        this.properties.put(PropertyType.ENCHANTABILITY, new SimpleItemProperty("Enchantability", AbstractPropertyProvider::getEnchantability, item -> item.getItemEnchantability() > 0, "Not enchantable"));
+        this.properties.put(PropertyType.ENCHANTABILITY, new SimpleItemProperty("Enchantability", AbstractPropertyProvider::getEnchantability));
     }
 
     public void registerPropertyProvider(String modid, AbstractPropertyProvider provider) {

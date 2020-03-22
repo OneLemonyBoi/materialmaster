@@ -8,35 +8,37 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.function.Supplier;
 
+/**
+ * annotation used for two types of objects:
+ *
+ * property provider classes for automatic registering
+ * fields synced to a config option which needs to be build first
+ */
+@SuppressWarnings("unused")
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.FIELD})
 public @interface SyncProvider {
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    @interface EntrySet {
+    /**
+     * @return config path; consists of category and name
+     */
+    String[] path() default "";
 
-        String[] path();
+    /**
+     * @return type of forge registry to be used to build this collection
+     */
+    RegistryType type() default RegistryType.ITEMS;
 
-        RegistryType type();
+    /**
+     * @return min value for map entries
+     */
+    double min() default Integer.MIN_VALUE;
 
-    }
+    /**
+     * @return max value for map entries
+     */
+    double max() default Integer.MAX_VALUE;
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    @interface EntryMap {
-
-        String[] path();
-
-        RegistryType type();
-
-        double min() default Integer.MIN_VALUE;
-
-        double max() default Integer.MAX_VALUE;
-
-    }
-
-    @SuppressWarnings("unused")
     enum RegistryType {
 
         BLOCKS(PropertyProviderUtils::createBlockBuilder),

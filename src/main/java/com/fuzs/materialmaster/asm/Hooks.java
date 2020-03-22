@@ -2,8 +2,8 @@ package com.fuzs.materialmaster.asm;
 
 import com.fuzs.materialmaster.common.handler.RegisterAttributeHandler;
 import com.fuzs.materialmaster.core.PropertySyncManager;
-import com.fuzs.materialmaster.core.property.AttributeItemProperty;
-import com.fuzs.materialmaster.core.property.SimpleItemProperty;
+import com.fuzs.materialmaster.core.storage.AttributeItemProperty;
+import com.fuzs.materialmaster.core.storage.SimpleItemProperty;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.client.Minecraft;

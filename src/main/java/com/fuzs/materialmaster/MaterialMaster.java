@@ -1,6 +1,5 @@
 package com.fuzs.materialmaster;
 
-import com.fuzs.materialmaster.api.PropertyProviderUtils;
 import com.fuzs.materialmaster.client.handler.ItemTooltipHandler;
 import com.fuzs.materialmaster.common.handler.DigSpeedHandler;
 import com.fuzs.materialmaster.common.handler.RegisterAttributeHandler;

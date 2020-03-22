@@ -22,30 +22,56 @@ import net.minecraftforge.registries.ForgeRegistries;
 @SuppressWarnings("unused")
 public class PropertyProviderUtils {
 
+    /**
+     * @return attack reach attribute registered by this mod
+     */
     public static IAttribute getAttackReachAttribute() {
 
         return RegisterAttributeHandler.ATTACK_REACH;
     }
 
+    /**
+     * @param player player to get instance from
+     * @return attack reach attribute instance registered by this mod
+     */
     public static IAttributeInstance getAttackReachForPlayer(PlayerEntity player) {
 
         return player.getAttribute(RegisterAttributeHandler.ATTACK_REACH);
     }
 
+    /**
+     * @param player player to get value from
+     * @return attack reach attribute value registered by this mod
+     */
     public static double getAttackReachFromPlayer(PlayerEntity player) {
 
         return player.getAttribute(RegisterAttributeHandler.ATTACK_REACH).getValue();
     }
 
+    /**
+     * old way of registering property providers manually, use {@link #registerModProvider()} instead
+     * @param provider provider object to be registered
+     */
     @Deprecated
     public static void registerProvider(AbstractPropertyProvider provider) {
 
         PropertySyncManager.getInstance().registerPropertyProvider(ModLoadingContext.get().getActiveContainer().getModId(), provider);
     }
 
+    /**
+     * register a mod to be searched for {@link com.fuzs.materialmaster.api.SyncProvider} annotations
+     */
+    public static void registerModProvider(String modid) {
+
+        ModSyncManager.getInstance().registerModProvider(modid);
+    }
+
+    /**
+     * register the current mod to be searched for {@link com.fuzs.materialmaster.api.SyncProvider} annotations
+     */
     public static void registerModProvider() {
 
-        ModSyncManager.getInstance().registerModProvider();
+        registerModProvider(ModLoadingContext.get().getActiveContainer().getModId());
     }
 
     public static EntryCollectionBuilder<Block> createBlockBuilder() {

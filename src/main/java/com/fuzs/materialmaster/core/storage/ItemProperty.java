@@ -1,4 +1,4 @@
-package com.fuzs.materialmaster.core.property;
+package com.fuzs.materialmaster.core.storage;
 
 import com.fuzs.materialmaster.MaterialMaster;
 import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;

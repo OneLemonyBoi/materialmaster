@@ -9,9 +9,12 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class StringListParser<T extends IForgeRegistryEntry<T>> {
+
+    protected static final BiConsumer<String, String> ENTRY_LOGGER = (entry, message) -> MaterialMaster.LOGGER.error("Unable to parse entry \"" + entry + "\": " + message);
 
     private final IForgeRegistry<T> activeRegistry;
     private final T defaultEntry;
@@ -22,16 +25,11 @@ public class StringListParser<T extends IForgeRegistryEntry<T>> {
         this.defaultEntry = registry.getValue(registry.getDefaultKey());
     }
 
-    protected final void logStringParsingError(String entry, String message) {
-        
-        MaterialMaster.LOGGER.error("Unable to parse entry \"" + entry + "\": " + message);
-    }
-
     protected final boolean checkOverwrite(boolean flag, String entry) {
 
         if (flag) {
 
-            this.logStringParsingError(entry, "Already present");
+            ENTRY_LOGGER.accept(entry, "Already present");
         }
 
         return !flag;
@@ -68,7 +66,7 @@ public class StringListParser<T extends IForgeRegistryEntry<T>> {
                 break;
             default:
 
-                this.logStringParsingError(source, "Invalid resource location format");
+                ENTRY_LOGGER.accept(source, "Invalid resource location format");
         }
     }
 
@@ -80,7 +78,7 @@ public class StringListParser<T extends IForgeRegistryEntry<T>> {
             return Optional.of(entry);
         } else {
 
-            this.logStringParsingError(location.toString(), "Entry not found");
+            ENTRY_LOGGER.accept(location.toString(), "Entry not found");
         }
 
         return Optional.empty();
@@ -95,7 +93,7 @@ public class StringListParser<T extends IForgeRegistryEntry<T>> {
 
         if (entries.isEmpty()) {
 
-            this.logStringParsingError(namespace + ':' + path, "Entry not found");
+            ENTRY_LOGGER.accept(namespace + ':' + path, "Entry not found");
         }
 
         return entries;
