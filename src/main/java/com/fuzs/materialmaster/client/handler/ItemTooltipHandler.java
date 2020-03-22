@@ -46,12 +46,11 @@ public class ItemTooltipHandler {
         ItemStack stack = evt.getItemStack();
 
         // respect hide flag tag
-        if (stack.hasTag() && stack.getTag().contains("HideFlags", 99)) {
+        boolean flag = stack.hasTag() && stack.getTag().contains("HideFlags", 99)
+                && (stack.getTag().getInt("HideFlags") & 2) != 0;
+        if (flag || player == null) {
 
-            if ((stack.getTag().getInt("HideFlags") & 2) != 0) {
-
-                return;
-            }
+            return;
         }
 
         int start = -1, end = -1;
@@ -102,7 +101,7 @@ public class ItemTooltipHandler {
 
                     AttributeModifier attributemodifier = entry.getValue();
                     double amount = attributemodifier.getAmount();
-                    if (equipmentslottype == EquipmentSlotType.MAINHAND && player != null && PropertySyncManager.getInstance().isKnownAttributeId(attributemodifier.getID())) {
+                    if (equipmentslottype == EquipmentSlotType.MAINHAND && PropertySyncManager.getInstance().isKnownAttributeId(attributemodifier.getID())) {
 
                         // collect known attributes in separate map for adding later collectively
                         stats.merge(entry.getKey(), amount, Double::sum);
@@ -127,30 +126,27 @@ public class ItemTooltipHandler {
 
                 if (!stats.isEmpty()) {
 
-                    if (player != null) {
+                    stats.replaceAll((name, value) -> {
 
-                        stats.replaceAll((name, value) -> {
+                        IAttributeInstance attributeInstance = player.getAttributes().getAttributeInstanceByName(name);
+                        if (attributeInstance != null) {
 
-                            IAttributeInstance attributeInstance = player.getAttributes().getAttributeInstanceByName(name);
-                            if (attributeInstance != null) {
+                            value += attributeInstance.getBaseValue();
+                            // reach attributes are handled differently depending on game mode
+                            if (!player.abilities.isCreativeMode && (attributeInstance.getAttribute() == PlayerEntity.REACH_DISTANCE
+                                    || attributeInstance.getAttribute() == RegisterAttributeHandler.ATTACK_REACH)) {
 
-                                value += attributeInstance.getBaseValue();
-                                // reach attributes are handled differently depending on game mode
-                                if (!player.abilities.isCreativeMode && (attributeInstance.getAttribute() == PlayerEntity.REACH_DISTANCE
-                                        || attributeInstance.getAttribute() == RegisterAttributeHandler.ATTACK_REACH)) {
-
-                                    value -= 0.5;
-                                }
-
-                                if (attributeInstance.getAttribute() == SharedMonsterAttributes.ATTACK_DAMAGE) {
-
-                                    value += EnchantmentHelper.getModifierForCreature(stack, CreatureAttribute.UNDEFINED);
-                                }
+                                value -= 0.5;
                             }
 
-                            return value;
-                        });
-                    }
+                            if (attributeInstance.getAttribute() == SharedMonsterAttributes.ATTACK_DAMAGE) {
+
+                                value += EnchantmentHelper.getModifierForCreature(stack, CreatureAttribute.UNDEFINED);
+                            }
+                        }
+
+                        return value;
+                    });
 
                     for (Map.Entry<String, Double> entry : stats.entrySet()) {
 

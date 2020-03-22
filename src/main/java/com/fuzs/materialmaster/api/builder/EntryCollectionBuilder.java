@@ -17,16 +17,30 @@ public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends St
         super(registry);
     }
 
+    /**
+     * @param locations resource locations to build set from
+     * @return entry set associated with given resource locations in active registry
+     */
     public Set<T> buildEntrySet(List<String> locations) {
 
         return this.buildEntrySetWithCondition(locations, flag -> true, "");
     }
 
+    /**
+     * @param locations resource locations to build set from
+     * @return entry map associated with given resource locations in active registry paired with a given double value
+     */
     public Map<T, Double> buildEntryMap(List<String> locations) {
 
         return this.buildEntryMapWithCondition(locations, (entry, value) -> true, "");
     }
 
+    /**
+     * @param locations resource locations to build set from
+     * @param condition condition need to match for an entry to be added to the set
+     * @param message message to be logged when {@param condition} is not met
+     * @return entry set associated with given resource locations in active registry
+     */
     public Set<T> buildEntrySetWithCondition(List<String> locations, Predicate<T> condition, String message) {
 
         Set<T> set = Sets.newHashSet();
@@ -42,7 +56,7 @@ public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends St
                     }
                 } else {
 
-                    this.logStringParsingError(source, message);
+                    ENTRY_LOGGER.accept(source, message);
                 }
             });
         }
@@ -50,6 +64,12 @@ public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends St
         return set;
     }
 
+    /**
+     * @param locations resource locations to build set from
+     * @param condition condition need to match for an entry to be added to the map
+     * @param message message to be logged when {@param condition} is not met
+     * @return entry map associated with given resource locations in active registry paired with a given double value
+     */
     public Map<T, Double> buildEntryMapWithCondition(List<String> locations, BiPredicate<T, Double> condition, String message) {
 
         Map<T, Double> map = Maps.newHashMap();
@@ -70,7 +90,7 @@ public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends St
                     size = Optional.of(Double.parseDouble(s[1]));
                 } catch (NumberFormatException ignored) {
 
-                    this.logStringParsingError(source, "Invalid number format");
+                    ENTRY_LOGGER.accept(source, "Invalid number format");
                 }
 
                 size.ifPresent(value -> entries.forEach(entry -> {
@@ -83,12 +103,12 @@ public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends St
                         }
                     } else {
 
-                        this.logStringParsingError(source, message);
+                        ENTRY_LOGGER.accept(source, message);
                     }
                 }));
             } else {
 
-                this.logStringParsingError(source, "Insufficient number of arguments");
+                ENTRY_LOGGER.accept(source, "Insufficient number of arguments");
             }
         }
 

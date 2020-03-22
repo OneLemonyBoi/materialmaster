@@ -1,7 +1,7 @@
 package com.fuzs.materialmaster.common.handler;
 
 import com.fuzs.materialmaster.core.PropertySyncManager;
-import com.fuzs.materialmaster.core.property.SimpleItemProperty;
+import com.fuzs.materialmaster.core.storage.SimpleItemProperty;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -24,7 +24,9 @@ public class DigSpeedHandler {
         ItemStack itemstack = player.getHeldItemMainhand();
         if (!itemstack.isEmpty()) {
 
-            float speed = ((SimpleItemProperty) PropertySyncManager.getInstance().getProperty("dig_speed")).getValue(itemstack.getItem(), (double) f).floatValue();
+            float speed = ((SimpleItemProperty) PropertySyncManager.getInstance()
+                    .getProperty(PropertySyncManager.PropertyType.DIG_SPEED))
+                    .getValue(itemstack.getItem(), (double) f).floatValue();
             // won't apply when the tool is not effective on the current block, but will allow disabling dig speed for any block
             if (speed == 0.0F || f > 1.0F) {
 

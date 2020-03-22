@@ -26,7 +26,7 @@ public class ConfigPropertyProvider extends AbstractPropertyProvider {
     @Override
     public String getName() {
 
-        return MaterialMaster.MODID;
+        return MaterialMaster.NAME;
     }
 
     @Override

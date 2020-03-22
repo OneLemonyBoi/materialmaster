@@ -16,6 +16,9 @@ import net.minecraft.item.Item;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * builder class mainly for easily defining an attribute map
+ */
 @SuppressWarnings("UnusedReturnValue")
 public class AttributeMapBuilder {
 
@@ -24,17 +27,28 @@ public class AttributeMapBuilder {
     private final UUID mainhandModifierId;
     private final UUID[] armorModifierIds;
 
+    /**
+     * use {@link #create} instead
+     */
     private AttributeMapBuilder(UUID mainhand, UUID[] armor) {
 
         this.mainhandModifierId = mainhand;
         this.armorModifierIds = armor;
     }
 
+    /**
+     * @param mainhand modifier id to be used for mainhand
+     * @param armor modifier id to be used for armor slots
+     * @return new attribute builder for given uuids
+     */
     public static AttributeMapBuilder create(UUID mainhand, UUID[] armor) {
 
         return new AttributeMapBuilder(mainhand, armor);
     }
-    
+
+    /**
+     * @return attribute map from this builder
+     */
     public Map<Item, Multimap<String, AttributeModifier>> build() {
         
         return this.attributes;

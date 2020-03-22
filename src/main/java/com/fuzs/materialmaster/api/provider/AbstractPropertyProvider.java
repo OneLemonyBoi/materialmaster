@@ -12,44 +12,77 @@ import java.util.UUID;
 
 public abstract class AbstractPropertyProvider {
 
+    /**
+     * @return if this provider is enabled, should ideally be linked to a config option
+     */
     public abstract boolean isEnabled();
 
+    /**
+     * @return name of the mod this provider comes from
+     */
     public abstract String getName();
 
+    /**
+     * @return attribute map for each item, use {@link com.fuzs.materialmaster.api.builder.AttributeMapBuilder} to create this map
+     */
     public Map<Item, Multimap<String, AttributeModifier>> getAttributes() {
 
         return Maps.newHashMap();
     }
 
+    /**
+     * @return stack size map
+     */
     public Map<Item, Double> getStackSize() {
 
         return Maps.newHashMap();
     }
 
+    /**
+     * @return durability map
+     */
     public Map<Item, Double> getDurability() {
 
         return Maps.newHashMap();
     }
 
+    /**
+     * @return dig speed map
+     */
     public Map<Item, Double> getDigSpeed() {
 
         return Maps.newHashMap();
     }
 
+    /**
+     * @return harvest level map
+     */
     public Map<Item, Double> getHarvestLevel() {
 
         return Maps.newHashMap();
     }
 
+    /**
+     * @return enchantability map
+     */
     public Map<Item, Double> getEnchantability() {
 
         return Maps.newHashMap();
     }
 
+    /**
+     * @return single modifier id needed for registering attributes from this provider
+     */
     protected abstract UUID getMainhandModifierId();
 
+    /**
+     * @return four armor modifier ids needed for registering attributes from this provider
+     */
     protected abstract UUID[] getArmorModifierIds();
 
+    /**
+     * @return all attribute modifier ids used by this provider for properly displaying attributes on item tooltips
+     */
     public final Set<UUID> getAttributeIds() {
 
         Set<UUID> ids = Sets.newHashSet(this.getArmorModifierIds());
