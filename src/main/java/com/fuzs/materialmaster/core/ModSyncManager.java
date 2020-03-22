@@ -11,7 +11,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.moddiscovery.ModAnnotation;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.objectweb.asm.Type;
@@ -35,8 +37,11 @@ public class ModSyncManager {
     private ModSyncManager() {
     }
 
-    public void registerModProvider(String modid) {
+    public void registerModProvider() {
 
+        // all of this comes from the mod currently registering itself
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onModConfig);
+        String modid = ModLoadingContext.get().getActiveContainer().getModId();
         this.mods.put(modid, Sets.newHashSet());
     }
 
