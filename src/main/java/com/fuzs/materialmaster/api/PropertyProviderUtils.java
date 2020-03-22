@@ -59,19 +59,11 @@ public class PropertyProviderUtils {
     }
 
     /**
-     * register a mod to be searched for {@link com.fuzs.materialmaster.api.SyncProvider} annotations
-     */
-    public static void registerModProvider(String modid) {
-
-        ModSyncManager.getInstance().registerModProvider(modid);
-    }
-
-    /**
      * register the current mod to be searched for {@link com.fuzs.materialmaster.api.SyncProvider} annotations
      */
     public static void registerModProvider() {
 
-        registerModProvider(ModLoadingContext.get().getActiveContainer().getModId());
+        ModSyncManager.getInstance().registerModProvider();
     }
 
     public static EntryCollectionBuilder<Block> createBlockBuilder() {
