@@ -15,6 +15,9 @@ public class RegisterAttributeHandler {
 
     public static final IAttribute ATTACK_REACH = new RangedAttribute(null,  MaterialMaster.MODID + ".attackReach", 5.0, ConfigBuildHandler.MIN_ATTACK_REACH.get(), ConfigBuildHandler.MAX_ATTACK_REACH.get()).setShouldWatch(true);
 
+    public static final double REACH_DISTANCE_CREATIVE_BOOST = 0.5;
+    public static final double ATTACK_REACH_CREATIVE_BOOST = 2.0;
+
     @SuppressWarnings("unused")
     @SubscribeEvent
     public void onEntityConstructing(final EntityEvent.EntityConstructing evt) {
@@ -46,8 +49,8 @@ public class RegisterAttributeHandler {
             player.getAttribute(LivingEntity.SWIM_SPEED).setBaseValue(ConfigBuildHandler.DEFAULT_SWIM_SPEED.get());
             player.getAttribute(LivingEntity.ENTITY_GRAVITY).setBaseValue(ConfigBuildHandler.DEFAULT_GRAVITY.get());
             // default value is for creative mode
-            player.getAttribute(PlayerEntity.REACH_DISTANCE).setBaseValue(ConfigBuildHandler.DEFAULT_REACH_DISTANCE.get() + 0.5);
-            player.getAttribute(ATTACK_REACH).setBaseValue(ConfigBuildHandler.DEFAULT_ATTACK_REACH.get() + 0.5);
+            player.getAttribute(PlayerEntity.REACH_DISTANCE).setBaseValue(ConfigBuildHandler.DEFAULT_REACH_DISTANCE.get() + RegisterAttributeHandler.REACH_DISTANCE_CREATIVE_BOOST);
+            player.getAttribute(ATTACK_REACH).setBaseValue(ConfigBuildHandler.DEFAULT_ATTACK_REACH.get() + RegisterAttributeHandler.ATTACK_REACH_CREATIVE_BOOST);
         }
     }
 
