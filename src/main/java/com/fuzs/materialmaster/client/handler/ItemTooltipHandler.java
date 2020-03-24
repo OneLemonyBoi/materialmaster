@@ -133,10 +133,10 @@ public class ItemTooltipHandler {
 
                             value += attributeInstance.getBaseValue();
                             // reach attributes are handled differently depending on game mode
-                            if (!player.abilities.isCreativeMode && (attributeInstance.getAttribute() == PlayerEntity.REACH_DISTANCE
-                                    || attributeInstance.getAttribute() == RegisterAttributeHandler.ATTACK_REACH)) {
+                            if (!player.abilities.isCreativeMode) {
 
-                                value -= 0.5;
+                                value -= attributeInstance.getAttribute() == PlayerEntity.REACH_DISTANCE ? RegisterAttributeHandler.REACH_DISTANCE_CREATIVE_BOOST : 0.0;
+                                value -= attributeInstance.getAttribute() == RegisterAttributeHandler.ATTACK_REACH ? RegisterAttributeHandler.ATTACK_REACH_CREATIVE_BOOST : 0.0;
                             }
 
                             if (attributeInstance.getAttribute() == SharedMonsterAttributes.ATTACK_DAMAGE) {

@@ -53,7 +53,7 @@ public class Hooks {
         if (player != null) {
 
             double attrib = player.getAttribute(RegisterAttributeHandler.ATTACK_REACH).getValue();
-            return player.abilities.isCreativeMode ? attrib : attrib - 0.5;
+            return player.abilities.isCreativeMode ? attrib : attrib - RegisterAttributeHandler.ATTACK_REACH_CREATIVE_BOOST;
         }
 
         return 0.0;
@@ -71,7 +71,7 @@ public class Hooks {
         if (player != null) {
 
             attrib += player.getAttribute(RegisterAttributeHandler.ATTACK_REACH).getValue();
-            attrib -= player.abilities.isCreativeMode ? 0.0F : 0.5;
+            attrib -= player.abilities.isCreativeMode ? 0.0F : RegisterAttributeHandler.ATTACK_REACH_CREATIVE_BOOST;
         }
 
         RayTraceResult objectMouseOver = entity.func_213324_a(attrib, partialTicks, false);
@@ -87,16 +87,16 @@ public class Hooks {
     @OnlyIn(Dist.CLIENT)
     public static double getMaxSquareRange(double d0) {
 
-        return Math.pow(d0 + 0.5, 2);
+        return Math.pow(d0, 2);
     }
 
     /**
-     * adjust max square distance for finding a pointed entity on the server which is normally hardcoded to 9.0
+     * adjust max square distance for finding a pointed entity on the server which is normally hardcoded to 36.0
      * in {@link net.minecraft.network.play.ServerPlayNetHandler#processUseEntity}
      */
     public static double getEntityReachDistance(ServerPlayerEntity player, Entity entity) {
 
-        double d0 = Math.pow(player.getAttribute(RegisterAttributeHandler.ATTACK_REACH).getValue() + 0.5, 2);
+        double d0 = Math.pow(player.getAttribute(RegisterAttributeHandler.ATTACK_REACH).getValue(), 2);
         return player.canEntityBeSeen(entity) ? d0 : d0 / 4.0;
     }
 
