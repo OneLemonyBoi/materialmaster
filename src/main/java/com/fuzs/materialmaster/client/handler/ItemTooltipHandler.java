@@ -4,15 +4,8 @@ import com.fuzs.materialmaster.common.handler.RegisterAttributeHandler;
 import com.fuzs.materialmaster.core.PropertySyncManager;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.GameSettings;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.settings.AttackIndicatorStatus;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
@@ -23,10 +16,8 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.GameType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -35,8 +26,6 @@ import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
 public class ItemTooltipHandler {
-
-    private final Minecraft mc = Minecraft.getInstance();
 
     @SuppressWarnings({"unused", "ConstantConditions"})
     @SubscribeEvent
@@ -53,6 +42,25 @@ public class ItemTooltipHandler {
 
             return;
         }
+
+        int start = this.getStartingLine(tooltip);
+        if (start == -1) {
+
+            // search should always be successful, meaning another mod is messing around so don't do anything
+            return;
+        }
+
+        for (EquipmentSlotType equipmentslottype : EquipmentSlotType.values()) {
+
+            Multimap<String, AttributeModifier> multimap = stack.getAttributeModifiers(equipmentslottype);
+            if (!multimap.isEmpty()) {
+
+                start = this.addModifiersForSlot(tooltip, player, stack, start, equipmentslottype, multimap);
+            }
+        }
+    }
+
+    private int getStartingLine(List<ITextComponent> tooltip) {
 
         int start = -1, end = -1;
 
@@ -77,128 +85,100 @@ public class ItemTooltipHandler {
             }
         }
 
-        // remove vanilla attribute list
         if (start != -1) {
 
-            tooltip.subList(start, end != -1 ? ++end : tooltip.size()).clear();
-        } else {
+            if (end != -1) {
 
-            start = tooltip.size();
-        }
+                // remove vanilla attribute list
+                tooltip.subList(start, ++end).clear();
+            } else {
 
-        // add own attributes
-        for (EquipmentSlotType equipmentslottype : EquipmentSlotType.values()) {
-
-            Multimap<String, AttributeModifier> multimap = stack.getAttributeModifiers(equipmentslottype);
-            if (!multimap.isEmpty()) {
-
-                tooltip.add(start++, new StringTextComponent(""));
-                tooltip.add(start++, (new TranslationTextComponent("item.modifiers." + equipmentslottype.getName())).applyTextStyle(TextFormatting.GRAY));
-
-                int realStart = start;
-                // use tree map for default sorting
-                Map<String, Double> stats = Maps.newTreeMap();
-                for (Map.Entry<String, AttributeModifier> entry : multimap.entries()) {
-
-                    AttributeModifier attributemodifier = entry.getValue();
-                    double amount = attributemodifier.getAmount();
-                    if (equipmentslottype == EquipmentSlotType.MAINHAND && PropertySyncManager.getInstance().isKnownAttributeId(attributemodifier.getID())) {
-
-                        // collect known attributes in separate map for adding later collectively
-                        stats.merge(entry.getKey(), amount, Double::sum);
-                    } else {
-
-                        if (attributemodifier.getOperation() != AttributeModifier.Operation.ADDITION) {
-
-                            amount *= 100.0;
-                        }
-
-                        if (amount > 0.0) {
-
-                            tooltip.add(start++, (new TranslationTextComponent("attribute.modifier.plus." + attributemodifier.getOperation().getId(), ItemStack.DECIMALFORMAT.format(amount), new TranslationTextComponent("attribute.name." + entry.getKey()))).applyTextStyle(TextFormatting.BLUE));
-                        } else if (amount < 0.0) {
-
-                            amount *= -1.0;
-                            tooltip.add(start++, (new TranslationTextComponent("attribute.modifier.take." + attributemodifier.getOperation().getId(), ItemStack.DECIMALFORMAT.format(amount), new TranslationTextComponent("attribute.name." + entry.getKey()))).applyTextStyle(TextFormatting.RED));
-                        }
-                    }
-
-                }
-
-                if (!stats.isEmpty()) {
-
-                    stats.replaceAll((name, value) -> {
-
-                        IAttributeInstance attributeInstance = player.getAttributes().getAttributeInstanceByName(name);
-                        if (attributeInstance != null) {
-
-                            value += attributeInstance.getBaseValue();
-                            // reach attributes are handled differently depending on game mode
-                            if (!player.abilities.isCreativeMode) {
-
-                                value -= attributeInstance.getAttribute() == PlayerEntity.REACH_DISTANCE ? RegisterAttributeHandler.REACH_DISTANCE_CREATIVE_BOOST : 0.0;
-                                value -= attributeInstance.getAttribute() == RegisterAttributeHandler.ATTACK_REACH ? RegisterAttributeHandler.ATTACK_REACH_CREATIVE_BOOST : 0.0;
-                            }
-
-                            if (attributeInstance.getAttribute() == SharedMonsterAttributes.ATTACK_DAMAGE) {
-
-                                value += EnchantmentHelper.getModifierForCreature(stack, CreatureAttribute.UNDEFINED);
-                            }
-                        }
-
-                        return value;
-                    });
-
-                    for (Map.Entry<String, Double> entry : stats.entrySet()) {
-
-                        tooltip.add(realStart++, (new StringTextComponent(" ")).appendSibling(new TranslationTextComponent("attribute.modifier.equals." + AttributeModifier.Operation.ADDITION.getId(), ItemStack.DECIMALFORMAT.format(entry.getValue()), new TranslationTextComponent("attribute.name." + entry.getKey()))).applyTextStyle(TextFormatting.DARK_GREEN));
-                        // need to update start as well as everything is shifted by inserting somewhere in the middle
-                        // value might be needed again for another equipment slot
-                        start++;
-                    }
-                }
+                // another mod is messing around, so don't do anything
+                start = -1;
             }
         }
+
+        return start;
     }
 
-    @SuppressWarnings("unused")
-    @SubscribeEvent
-    public void onRenderGameOverlay(RenderGameOverlayEvent.Post evt) {
+    private int addModifiersForSlot(List<ITextComponent> tooltip, PlayerEntity player, ItemStack stack, int start, EquipmentSlotType equipmentslottype, Multimap<String, AttributeModifier> multimap) {
 
-        if (evt.getType() != RenderGameOverlayEvent.ElementType.CROSSHAIRS || this.mc.player == null || this.mc.playerController == null) {
+        tooltip.add(start++, new StringTextComponent(""));
+        tooltip.add(start++, (new TranslationTextComponent("item.modifiers." + equipmentslottype.getName())).applyTextStyle(TextFormatting.GRAY));
 
-            return;
+        // use tree map for default sorting
+        Map<String, Double> stats = Maps.newTreeMap();
+        int realStart = start;
+        start = this.processAttributeMap(tooltip, start, equipmentslottype == EquipmentSlotType.MAINHAND, multimap, stats);
+        if (!stats.isEmpty()) {
+
+            this.adjustStatValues(stats, stack, player);
+            for (Map.Entry<String, Double> entry : stats.entrySet()) {
+
+                tooltip.add(realStart++, (new StringTextComponent(" ")).appendSibling(new TranslationTextComponent("attribute.modifier.equals." + AttributeModifier.Operation.ADDITION.getId(), ItemStack.DECIMALFORMAT.format(entry.getValue()), new TranslationTextComponent("attribute.name." + entry.getKey()))).applyTextStyle(TextFormatting.DARK_GREEN));
+                // need to update start as well as everything is shifted by inserting somewhere in the middle
+                // value might be used again for another equipment slot
+                start++;
+            }
         }
 
-        GameSettings gamesettings = this.mc.gameSettings;
-        if (gamesettings.thirdPersonView == 0) {
+        return start;
+    }
 
-            if (this.mc.playerController.getCurrentGameType() != GameType.SPECTATOR || this.mc.ingameGUI.isTargetNamedMenuProvider(this.mc.objectMouseOver)) {
+    private int processAttributeMap(List<ITextComponent> tooltip, int start, boolean mainhand, Multimap<String, AttributeModifier> multimap, Map<String, Double> stats) {
 
-                if (!gamesettings.showDebugInfo || gamesettings.hideGUI || this.mc.player.hasReducedDebug() || gamesettings.reducedDebugInfo) {
+        for (Map.Entry<String, AttributeModifier> entry : multimap.entries()) {
 
-                    if (gamesettings.attackIndicator == AttackIndicatorStatus.CROSSHAIR) {
+            AttributeModifier attributemodifier = entry.getValue();
+            double amount = attributemodifier.getAmount();
+            if (mainhand && PropertySyncManager.getInstance().isKnownAttributeId(attributemodifier.getID())) {
 
-                        float f = this.mc.player.getCooledAttackStrength(0.0F);
-                        if (this.mc.pointedEntity != null && this.mc.pointedEntity instanceof LivingEntity && f >= 1.0F) {
+                // collect known attributes in separate map for adding later collectively
+                stats.merge(entry.getKey(), amount, Double::sum);
+            } else {
 
-                            // show attack indicator for everything that doesn't have default attack speed (4.0)
-                            if (this.mc.player.getCooldownPeriod() < 5.0F && this.mc.pointedEntity.isAlive()) {
+                if (attributemodifier.getOperation() != AttributeModifier.Operation.ADDITION) {
 
-                                this.mc.getTextureManager().bindTexture(AbstractGui.GUI_ICONS_LOCATION);
-                                RenderSystem.enableBlend();
-                                RenderSystem.enableAlphaTest();
-                                RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+                    amount *= 100.0;
+                }
 
-                                int k = this.mc.getMainWindow().getScaledWidth() / 2 - 8;
-                                int j = this.mc.getMainWindow().getScaledHeight() / 2 - 7 + 16;
-                                AbstractGui.blit(k, j, 68, 94, 16, 16, 256, 256);
-                            }
-                        }
-                    }
+                if (amount > 0.0) {
+
+                    tooltip.add(start++, (new TranslationTextComponent("attribute.modifier.plus." + attributemodifier.getOperation().getId(), ItemStack.DECIMALFORMAT.format(amount), new TranslationTextComponent("attribute.name." + entry.getKey()))).applyTextStyle(TextFormatting.BLUE));
+                } else if (amount < 0.0) {
+
+                    amount *= -1.0;
+                    tooltip.add(start++, (new TranslationTextComponent("attribute.modifier.take." + attributemodifier.getOperation().getId(), ItemStack.DECIMALFORMAT.format(amount), new TranslationTextComponent("attribute.name." + entry.getKey()))).applyTextStyle(TextFormatting.RED));
                 }
             }
         }
+
+        return start;
+    }
+
+    private void adjustStatValues(Map<String, Double> stats, ItemStack stack, PlayerEntity player) {
+
+        stats.entrySet().removeIf(entry -> entry.getValue() == 0.0);
+        stats.replaceAll((name, value) -> {
+
+            IAttributeInstance attributeInstance = player.getAttributes().getAttributeInstanceByName(name);
+            if (attributeInstance != null) {
+
+                value += attributeInstance.getBaseValue();
+
+                if (attributeInstance.getAttribute() == SharedMonsterAttributes.ATTACK_DAMAGE) {
+
+                    value += EnchantmentHelper.getModifierForCreature(stack, CreatureAttribute.UNDEFINED);
+                } else if (!player.abilities.isCreativeMode) {
+
+                    // reach attributes are handled differently depending on game mode
+                    value -= attributeInstance.getAttribute() == PlayerEntity.REACH_DISTANCE ? RegisterAttributeHandler.REACH_DISTANCE_CREATIVE_BOOST : 0.0;
+                    value -= attributeInstance.getAttribute() == RegisterAttributeHandler.ATTACK_REACH ? RegisterAttributeHandler.ATTACK_REACH_CREATIVE_BOOST : 0.0;
+                }
+            }
+
+            return value;
+        });
     }
 
 }

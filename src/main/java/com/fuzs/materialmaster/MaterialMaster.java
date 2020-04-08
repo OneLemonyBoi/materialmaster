@@ -1,5 +1,6 @@
 package com.fuzs.materialmaster;
 
+import com.fuzs.materialmaster.client.handler.AttackIndicatorHandler;
 import com.fuzs.materialmaster.client.handler.ItemTooltipHandler;
 import com.fuzs.materialmaster.common.handler.DigSpeedHandler;
 import com.fuzs.materialmaster.common.handler.RegisterAttributeHandler;
@@ -46,6 +47,7 @@ public class MaterialMaster {
     private void onClientSetup(final FMLClientSetupEvent evt) {
 
         MinecraftForge.EVENT_BUS.register(new ItemTooltipHandler());
+        MinecraftForge.EVENT_BUS.register(new AttackIndicatorHandler());
     }
 
 }
