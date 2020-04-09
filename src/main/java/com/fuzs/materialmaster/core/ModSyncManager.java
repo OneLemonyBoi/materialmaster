@@ -50,14 +50,37 @@ public class ModSyncManager {
         for (Map.Entry<String, Set<ModFileScanData.AnnotationData>> entry : this.mods.entrySet()) {
 
             String modid = entry.getKey();
-            Set<ModFileScanData.AnnotationData> annotated = ModList.get().getModFileById(modid).getFile()
-                    .getScanResult().getAnnotations().stream()
+            Set<ModFileScanData.AnnotationData> annotated = ModList.get().getModFileById(modid).getFile().getScanResult().getAnnotations();
+            Set<ModFileScanData.AnnotationData> providers = annotated.stream()
                     .filter(data -> Type.getType(SyncProvider.class).equals(data.getAnnotationType()))
                     .collect(Collectors.toSet());
 
-            // will remove classes automatically and only leave fields
-            this.processClasses(modid, annotated);
-            entry.getValue().addAll(annotated);
+//            // all onlyin annotations that don't match current distribution
+//            Set<ModFileScanData.AnnotationData> distributions = annotated.stream()
+//                    .filter(data -> Type.getType(OnlyIn.class).equals(data.getAnnotationType()))
+//                    .filter(data -> {
+//                        Dist dist = Optional.ofNullable((ModAnnotation.EnumHolder) data.getAnnotationData().get("value"))
+//                                .map(holder -> Dist.valueOf(holder.getValue()))
+//                                .orElse(null);
+//                        return dist != null && dist != FMLEnvironment.dist;
+//                    })
+//                    .collect(Collectors.toSet());
+
+//            // remove all classes and fields in classes annotated with wrong distribution
+//            providers.removeIf(provider -> distributions.stream()
+//                    .filter(dist -> dist.getTargetType().equals(ElementType.TYPE))
+//                    .map(ModFileScanData.AnnotationData::getClassType)
+//                    .anyMatch(dist -> dist.equals(provider.getClassType())));
+
+            // will remove classes automatically and only leave fields behind
+            this.processClasses(modid, providers);
+
+//            // remove fields annotated with wrong distribution
+//            providers.removeIf(provider -> distributions.stream()
+//                    .map(ModFileScanData.AnnotationData::getMemberName)
+//                    .anyMatch(dist -> dist.equals(provider.getMemberName())));
+
+            entry.getValue().addAll(providers);
         }
     }
 
@@ -84,31 +107,26 @@ public class ModSyncManager {
         annotated.removeIf(data -> data.getTargetType().equals(ElementType.TYPE));
     }
 
-    private void processFields(String modid, ForgeConfigSpec spec) {
+    private void processFields(Set<ModFileScanData.AnnotationData> annotated, ForgeConfigSpec spec, ModConfig.Type type) {
 
-        Optional.ofNullable(this.mods.get(modid)).ifPresent(annotated -> {
-
-            Set<AbstractProviderInfo> info = this.buildInfoSet(annotated, spec.getValues());
-            if (!info.isEmpty()) {
-
-                info.forEach(AbstractProviderInfo::sync);
-                this.syncable.merge(spec, info, (info1, info2) -> {
-
-                    info1.addAll(info2);
-                    return info1;
-                });
-            } else {
-
-                throw new RuntimeException("Empty info set");
-            }
-        });
+        Set<AbstractProviderInfo> info = this.buildInfoSet(annotated, spec.getValues(), type);
+        info.forEach(AbstractProviderInfo::sync);
+        this.syncable.put(spec, info);
     }
 
     @SuppressWarnings("unchecked")
-    private Set<AbstractProviderInfo> buildInfoSet(Set<ModFileScanData.AnnotationData> annotated, UnmodifiableConfig values) {
+    private Set<AbstractProviderInfo> buildInfoSet(Set<ModFileScanData.AnnotationData> annotated, UnmodifiableConfig values, ModConfig.Type configType) {
 
         Set<AbstractProviderInfo> info = Sets.newHashSet();
         for (ModFileScanData.AnnotationData data : annotated) {
+
+            ModConfig.Type type = Optional.ofNullable((ModAnnotation.EnumHolder) data.getAnnotationData().get("type"))
+                    .map(holder -> ModConfig.Type.valueOf(holder.getValue()))
+                    .orElse(ModConfig.Type.COMMON);
+            if (type != configType) {
+
+                continue;
+            }
 
             try {
 
@@ -116,14 +134,22 @@ public class ModSyncManager {
                 Field field = clazz.getDeclaredField(data.getMemberName());
 
                 final int modifiers = field.getModifiers();
-                if (!Modifier.isPublic(modifiers)|| !Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
+                if (!Modifier.isPublic(modifiers)|| !Modifier.isStatic(modifiers)) {
 
                     throw new RuntimeException(new IllegalAccessException());
                 }
 
+                if (Modifier.isFinal(modifiers)) {
+
+                    Field modifiersField = Field.class.getDeclaredField("modifiers");
+                    modifiersField.setAccessible(true);
+                    modifiersField.setInt(field, modifiers & ~Modifier.FINAL);
+                }
+
                 List<String> path = (List<String>) data.getAnnotationData().get("path");
-                ModAnnotation.EnumHolder holder = (ModAnnotation.EnumHolder) data.getAnnotationData().get("type");
-                SyncProvider.RegistryType type = holder != null ? SyncProvider.RegistryType.valueOf(holder.getValue()) : SyncProvider.RegistryType.ITEMS;
+                SyncProvider.RegistryType registry = Optional.ofNullable((ModAnnotation.EnumHolder) data.getAnnotationData().get("registry"))
+                        .map(holder -> SyncProvider.RegistryType.valueOf(holder.getValue()))
+                        .orElse(SyncProvider.RegistryType.ITEMS);
                 double min = (double) data.getAnnotationData().getOrDefault("min", (double) Integer.MIN_VALUE);
                 double max = (double) data.getAnnotationData().getOrDefault("max", (double) Integer.MAX_VALUE);
                 if (Set.class.isAssignableFrom(field.getType())) {
@@ -131,7 +157,7 @@ public class ModSyncManager {
                     Object value = values.get(Lists.newArrayList(path));
                     if (value instanceof ForgeConfigSpec.ConfigValue<?>) {
 
-                        info.add(new SetProviderInfo(field, (ForgeConfigSpec.ConfigValue<?>) value, type.createBuilder()));
+                        info.add(new SetProviderInfo(field, (ForgeConfigSpec.ConfigValue<?>) value, registry.createBuilder()));
                     } else {
 
                         throw new RuntimeException("Invalid config option path");
@@ -141,7 +167,7 @@ public class ModSyncManager {
                     Object value = values.get(Lists.newArrayList(path));
                     if (value instanceof ForgeConfigSpec.ConfigValue<?>) {
 
-                        info.add(new MapProviderInfo(field, (ForgeConfigSpec.ConfigValue<?>) value, type.createBuilder(), min, max));
+                        info.add(new MapProviderInfo(field, (ForgeConfigSpec.ConfigValue<?>) value, registry.createBuilder(), min, max));
                     } else {
 
                         throw new RuntimeException("Invalid config option path");
@@ -150,7 +176,7 @@ public class ModSyncManager {
 
                     throw new RuntimeException("Unsupported field type");
                 }
-            } catch (ClassNotFoundException | NoSuchFieldException e) {
+            } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
 
                 e.printStackTrace();
             }
@@ -162,19 +188,18 @@ public class ModSyncManager {
     // config event handler
     public void onModConfig(final ModConfig.Reloading evt) {
 
-        String modid = evt.getConfig().getModId();
-        ForgeConfigSpec spec = evt.getConfig().getSpec();
-        if (this.mods.containsKey(modid)) {
+        Optional.ofNullable(this.mods.get(evt.getConfig().getModId())).ifPresent(annotated -> {
 
+            ForgeConfigSpec spec = evt.getConfig().getSpec();
             Set<AbstractProviderInfo> providerInfo = this.syncable.get(spec);
             if (providerInfo != null) {
 
                 providerInfo.forEach(AbstractProviderInfo::sync);
             } else {
 
-                this.processFields(modid, spec);
+                this.processFields(annotated, spec, evt.getConfig().getType());
             }
-        }
+        });
     }
 
     public static ModSyncManager getInstance() {
