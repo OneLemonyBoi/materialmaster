@@ -55,31 +55,8 @@ public class ModSyncManager {
                     .filter(data -> Type.getType(SyncProvider.class).equals(data.getAnnotationType()))
                     .collect(Collectors.toSet());
 
-//            // all onlyin annotations that don't match current distribution
-//            Set<ModFileScanData.AnnotationData> distributions = annotated.stream()
-//                    .filter(data -> Type.getType(OnlyIn.class).equals(data.getAnnotationType()))
-//                    .filter(data -> {
-//                        Dist dist = Optional.ofNullable((ModAnnotation.EnumHolder) data.getAnnotationData().get("value"))
-//                                .map(holder -> Dist.valueOf(holder.getValue()))
-//                                .orElse(null);
-//                        return dist != null && dist != FMLEnvironment.dist;
-//                    })
-//                    .collect(Collectors.toSet());
-
-//            // remove all classes and fields in classes annotated with wrong distribution
-//            providers.removeIf(provider -> distributions.stream()
-//                    .filter(dist -> dist.getTargetType().equals(ElementType.TYPE))
-//                    .map(ModFileScanData.AnnotationData::getClassType)
-//                    .anyMatch(dist -> dist.equals(provider.getClassType())));
-
             // will remove classes automatically and only leave fields behind
             this.processClasses(modid, providers);
-
-//            // remove fields annotated with wrong distribution
-//            providers.removeIf(provider -> distributions.stream()
-//                    .map(ModFileScanData.AnnotationData::getMemberName)
-//                    .anyMatch(dist -> dist.equals(provider.getMemberName())));
-
             entry.getValue().addAll(providers);
         }
     }
