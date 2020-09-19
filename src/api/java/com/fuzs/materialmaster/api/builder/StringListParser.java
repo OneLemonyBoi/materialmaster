@@ -1,6 +1,6 @@
 package com.fuzs.materialmaster.api.builder;
 
-import com.fuzs.materialmaster.MaterialMaster;
+import com.fuzs.materialmaster.api.MaterialMasterReference;
 import com.google.common.collect.Lists;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class StringListParser<T extends IForgeRegistryEntry<T>> {
 
-    protected static final BiConsumer<String, String> ENTRY_LOGGER = (entry, message) -> MaterialMaster.LOGGER.error("Unable to parse entry \"" + entry + "\": " + message);
+    protected static final BiConsumer<String, String> ENTRY_LOGGER = (entry, message) -> MaterialMasterReference.LOGGER.error("Unable to parse entry \"{}\": {}", entry, message);
 
     private final IForgeRegistry<T> activeRegistry;
     private final T defaultEntry;

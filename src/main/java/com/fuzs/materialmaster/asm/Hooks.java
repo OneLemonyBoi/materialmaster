@@ -1,10 +1,12 @@
 package com.fuzs.materialmaster.asm;
 
+import com.fuzs.materialmaster.api.MaterialMasterReference;
+import com.fuzs.materialmaster.api.core.PropertySyncManager;
+import com.fuzs.materialmaster.api.core.storage.AttributeItemProperty;
+import com.fuzs.materialmaster.api.core.storage.SimpleItemProperty;
 import com.fuzs.materialmaster.common.handler.RegisterAttributeHandler;
-import com.fuzs.materialmaster.core.PropertySyncManager;
-import com.fuzs.materialmaster.core.storage.AttributeItemProperty;
-import com.fuzs.materialmaster.core.storage.SimpleItemProperty;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
@@ -34,9 +36,12 @@ public class Hooks {
         if ((!(stack.getItem() instanceof ArmorItem) && equipmentSlot == EquipmentSlotType.MAINHAND
                 || stack.getItem() instanceof ArmorItem && ((ArmorItem) stack.getItem()).getEquipmentSlot() == equipmentSlot)) {
 
-            multimap.putAll(((AttributeItemProperty) PropertySyncManager.getInstance()
-                    .getProperty(PropertySyncManager.PropertyType.ATTRIBUTES))
-                    .getValue(stack.getItem(), HashMultimap.create()));
+            return new ImmutableMultimap.Builder<String, AttributeModifier>()
+                    .putAll(multimap)
+                    .putAll(((AttributeItemProperty) PropertySyncManager.getInstance()
+                            .getProperty(PropertySyncManager.PropertyType.ATTRIBUTES))
+                            .getValue(stack.getItem(), HashMultimap.create()))
+                    .build();
         }
 
         return multimap;
@@ -52,8 +57,8 @@ public class Hooks {
         ClientPlayerEntity player = Minecraft.getInstance().player;
         if (player != null) {
 
-            double attrib = player.getAttribute(RegisterAttributeHandler.ATTACK_REACH).getValue();
-            return player.abilities.isCreativeMode ? attrib : attrib - RegisterAttributeHandler.ATTACK_REACH_CREATIVE_BOOST;
+            double attribute = player.getAttribute(MaterialMasterReference.ATTACK_REACH).getValue();
+            return player.abilities.isCreativeMode ? attribute : attribute - RegisterAttributeHandler.ATTACK_REACH_CREATIVE_BOOST;
         }
 
         return 0.0;
@@ -66,15 +71,15 @@ public class Hooks {
     @OnlyIn(Dist.CLIENT)
     public static double getSquareAttackDistance(float partialTicks, Entity entity) {
 
-        double attrib = 0.0;
+        double attribute = 0.0;
         ClientPlayerEntity player = Minecraft.getInstance().player;
         if (player != null) {
 
-            attrib += player.getAttribute(RegisterAttributeHandler.ATTACK_REACH).getValue();
-            attrib -= player.abilities.isCreativeMode ? 0.0F : RegisterAttributeHandler.ATTACK_REACH_CREATIVE_BOOST;
+            attribute += player.getAttribute(MaterialMasterReference.ATTACK_REACH).getValue();
+            attribute -= player.abilities.isCreativeMode ? 0.0F : RegisterAttributeHandler.ATTACK_REACH_CREATIVE_BOOST;
         }
 
-        RayTraceResult objectMouseOver = entity.func_213324_a(attrib, partialTicks, false);
+        RayTraceResult objectMouseOver = entity.func_213324_a(attribute, partialTicks, false);
         Vec3d vec3d = entity.getEyePosition(partialTicks);
 
         return objectMouseOver.getHitVec().squareDistanceTo(vec3d);
@@ -96,7 +101,7 @@ public class Hooks {
      */
     public static double getEntityReachDistance(ServerPlayerEntity player, Entity entity) {
 
-        double d0 = Math.pow(player.getAttribute(RegisterAttributeHandler.ATTACK_REACH).getValue(), 2);
+        double d0 = Math.pow(player.getAttribute(MaterialMasterReference.ATTACK_REACH).getValue(), 2);
         return player.canEntityBeSeen(entity) ? d0 : d0 / 4.0;
     }
 

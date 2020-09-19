@@ -11,9 +11,6 @@ public class ConfigBuildHandler {
 
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    public static final ForgeConfigSpec.DoubleValue MIN_ATTACK_REACH;
-    public static final ForgeConfigSpec.DoubleValue MAX_ATTACK_REACH;
-
     public static final ForgeConfigSpec.DoubleValue DEFAULT_MAX_HEALTH;
     public static final ForgeConfigSpec.DoubleValue DEFAULT_KNOCKBACK_RESISTANCE;
     public static final ForgeConfigSpec.DoubleValue DEFAULT_MOVEMENT_SPEED;
@@ -49,11 +46,6 @@ public class ConfigBuildHandler {
     public static final ForgeConfigSpec.ConfigValue<List<String>> ENCHANTABILITY;
 
     static {
-
-        BUILDER.push("general");
-        MIN_ATTACK_REACH = ConfigBuildHandler.BUILDER.comment("Smallest value attack reach attribute is allowed to have. Needs to be smaller than \"Attack Reach Max\". Changes require a restart to apply.").defineInRange("Attack Reach Min", 0.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        MAX_ATTACK_REACH = ConfigBuildHandler.BUILDER.comment("Largest value attack reach attribute is allowed to have. Needs to be greater than \"Attack Reach Min\". Changes require a restart to apply.").defineInRange("Attack Reach Max", 1024.0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        BUILDER.pop();
 
         BUILDER.comment("Set default values for all attributes used by the player.", "Actual range might differ with certain mods like \"AttributeFix\" installed. Changes require relogging to apply.");
         BUILDER.push("default_attribute_values");

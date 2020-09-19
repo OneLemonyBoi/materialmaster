@@ -1,5 +1,6 @@
 package com.fuzs.materialmaster.api.provider;
 
+import com.fuzs.materialmaster.api.builder.AttributeMapBuilder;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -23,7 +24,12 @@ public abstract class AbstractPropertyProvider {
     public abstract String getName();
 
     /**
-     * @return attribute map for each item, use {@link com.fuzs.materialmaster.api.builder.AttributeMapBuilder} to create this map
+     * @return priority of this provider
+     */
+    public abstract int getPriority();
+
+    /**
+     * @return attribute map for each item, use {@link AttributeMapBuilder} to create this map
      */
     public Map<Item, Multimap<String, AttributeModifier>> getAttributes() {
 

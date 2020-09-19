@@ -38,7 +38,7 @@ public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends St
     /**
      * @param locations resource locations to build set from
      * @param condition condition need to match for an entry to be added to the set
-     * @param message message to be logged when {@param condition} is not met
+     * @param message message to be logged when condition is not met
      * @return entry set associated with given resource locations in active registry
      */
     public Set<T> buildEntrySetWithCondition(List<String> locations, Predicate<T> condition, String message) {
@@ -67,7 +67,7 @@ public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends St
     /**
      * @param locations resource locations to build set from
      * @param condition condition need to match for an entry to be added to the map
-     * @param message message to be logged when {@param condition} is not met
+     * @param message message to be logged when condition is not met
      * @return entry map associated with given resource locations in active registry paired with a given double value
      */
     public Map<T, Double> buildEntryMapWithCondition(List<String> locations, BiPredicate<T, Double> condition, String message) {

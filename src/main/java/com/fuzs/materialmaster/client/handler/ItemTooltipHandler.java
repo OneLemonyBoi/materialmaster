@@ -1,7 +1,8 @@
 package com.fuzs.materialmaster.client.handler;
 
+import com.fuzs.materialmaster.api.MaterialMasterReference;
 import com.fuzs.materialmaster.common.handler.RegisterAttributeHandler;
-import com.fuzs.materialmaster.core.PropertySyncManager;
+import com.fuzs.materialmaster.api.core.PropertySyncManager;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -108,14 +109,15 @@ public class ItemTooltipHandler {
 
         // use tree map for default sorting
         Map<String, Double> stats = Maps.newTreeMap();
-        int realStart = start;
+        // insert known attributes at the top
+        int knownAttributesStart = start;
         start = this.processAttributeMap(tooltip, start, equipmentslottype == EquipmentSlotType.MAINHAND, multimap, stats);
         if (!stats.isEmpty()) {
 
             this.adjustStatValues(stats, stack, player);
             for (Map.Entry<String, Double> entry : stats.entrySet()) {
 
-                tooltip.add(realStart++, (new StringTextComponent(" ")).appendSibling(new TranslationTextComponent("attribute.modifier.equals." + AttributeModifier.Operation.ADDITION.getId(), ItemStack.DECIMALFORMAT.format(entry.getValue()), new TranslationTextComponent("attribute.name." + entry.getKey()))).applyTextStyle(TextFormatting.DARK_GREEN));
+                tooltip.add(knownAttributesStart++, (new StringTextComponent(" ")).appendSibling(new TranslationTextComponent("attribute.modifier.equals." + AttributeModifier.Operation.ADDITION.getId(), ItemStack.DECIMALFORMAT.format(entry.getValue()), new TranslationTextComponent("attribute.name." + entry.getKey()))).applyTextStyle(TextFormatting.DARK_GREEN));
                 // need to update start as well as everything is shifted by inserting somewhere in the middle
                 // value might be used again for another equipment slot
                 start++;
@@ -158,7 +160,6 @@ public class ItemTooltipHandler {
 
     private void adjustStatValues(Map<String, Double> stats, ItemStack stack, PlayerEntity player) {
 
-        stats.entrySet().removeIf(entry -> entry.getValue() == 0.0);
         stats.replaceAll((name, value) -> {
 
             IAttributeInstance attributeInstance = player.getAttributes().getAttributeInstanceByName(name);
@@ -173,7 +174,7 @@ public class ItemTooltipHandler {
 
                     // reach attributes are handled differently depending on game mode
                     value -= attributeInstance.getAttribute() == PlayerEntity.REACH_DISTANCE ? RegisterAttributeHandler.REACH_DISTANCE_CREATIVE_BOOST : 0.0;
-                    value -= attributeInstance.getAttribute() == RegisterAttributeHandler.ATTACK_REACH ? RegisterAttributeHandler.ATTACK_REACH_CREATIVE_BOOST : 0.0;
+                    value -= attributeInstance.getAttribute() == MaterialMasterReference.ATTACK_REACH ? RegisterAttributeHandler.ATTACK_REACH_CREATIVE_BOOST : 0.0;
                 }
             }
 

@@ -1,6 +1,6 @@
-package com.fuzs.materialmaster.core.storage;
+package com.fuzs.materialmaster.api.core.storage;
 
-import com.fuzs.materialmaster.MaterialMaster;
+import com.fuzs.materialmaster.api.MaterialMasterReference;
 import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;
 import com.google.common.collect.Maps;
 import net.minecraft.item.Item;
@@ -63,7 +63,7 @@ public abstract class ItemProperty<T> {
 
         if (this.properties.containsKey(item)) {
 
-            MaterialMaster.LOGGER.warn("Property \"" + this.name + "\" for item \"" + item.getDisplayName(ItemStack.EMPTY).getUnformattedComponentText() + "\" has been overwritten by " + provider);
+            MaterialMasterReference.LOGGER.warn("Property \"{}\" for item \"{}\" has been overwritten by {}", this.name, item.getDisplayName(ItemStack.EMPTY).getUnformattedComponentText(), provider);
         }
     }
 
@@ -71,7 +71,7 @@ public abstract class ItemProperty<T> {
 
         if (!flag) {
 
-            MaterialMaster.LOGGER.error("Unable to set property \"" + this.name + "\" for item \"" + item.getDisplayName(ItemStack.EMPTY).getUnformattedComponentText() + "\": " + message);
+            MaterialMasterReference.LOGGER.error("Unable to set property \"{}\" for item \"{}\": {}", this.name, item.getDisplayName(ItemStack.EMPTY).getUnformattedComponentText(), message);
         }
 
         return flag;

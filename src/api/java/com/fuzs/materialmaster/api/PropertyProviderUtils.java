@@ -1,10 +1,7 @@
 package com.fuzs.materialmaster.api;
 
 import com.fuzs.materialmaster.api.builder.EntryCollectionBuilder;
-import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;
-import com.fuzs.materialmaster.common.handler.RegisterAttributeHandler;
-import com.fuzs.materialmaster.core.ModSyncManager;
-import com.fuzs.materialmaster.core.PropertySyncManager;
+import com.fuzs.materialmaster.api.core.ModSyncManager;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
@@ -16,18 +13,28 @@ import net.minecraft.item.Item;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.Potion;
 import net.minecraft.world.biome.Biome;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.registries.ForgeRegistries;
+
+import javax.annotation.Nullable;
 
 @SuppressWarnings("unused")
 public class PropertyProviderUtils {
+
+    /**
+     * register current mod to be searched for {@link SyncProvider} annotations
+     */
+    public static void registerSyncProviderMod(String modId, @Nullable ModConfig config) {
+
+        ModSyncManager.getInstance().registerSyncProviderMod(modId, config);
+    }
 
     /**
      * @return attack reach attribute registered by this mod
      */
     public static IAttribute getAttackReachAttribute() {
 
-        return RegisterAttributeHandler.ATTACK_REACH;
+        return MaterialMasterReference.ATTACK_REACH;
     }
 
     /**
@@ -36,7 +43,7 @@ public class PropertyProviderUtils {
      */
     public static IAttributeInstance getAttackReachForPlayer(PlayerEntity player) {
 
-        return player.getAttribute(RegisterAttributeHandler.ATTACK_REACH);
+        return player.getAttribute(MaterialMasterReference.ATTACK_REACH);
     }
 
     /**
@@ -45,25 +52,7 @@ public class PropertyProviderUtils {
      */
     public static double getAttackReachFromPlayer(PlayerEntity player) {
 
-        return player.getAttribute(RegisterAttributeHandler.ATTACK_REACH).getValue();
-    }
-
-    /**
-     * old way of registering property providers manually, use {@link #registerModProvider()} instead
-     * @param provider provider object to be registered
-     */
-    @Deprecated
-    public static void registerProvider(AbstractPropertyProvider provider) {
-
-        PropertySyncManager.getInstance().registerPropertyProvider(ModLoadingContext.get().getActiveContainer().getModId(), provider);
-    }
-
-    /**
-     * register the current mod to be searched for {@link com.fuzs.materialmaster.api.SyncProvider} annotations
-     */
-    public static void registerModProvider() {
-
-        ModSyncManager.getInstance().registerModProvider();
+        return player.getAttribute(MaterialMasterReference.ATTACK_REACH).getValue();
     }
 
     public static EntryCollectionBuilder<Block> createBlockBuilder() {

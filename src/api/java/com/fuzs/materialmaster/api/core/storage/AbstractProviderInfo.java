@@ -1,4 +1,4 @@
-package com.fuzs.materialmaster.core.storage;
+package com.fuzs.materialmaster.api.core.storage;
 
 import com.fuzs.materialmaster.api.builder.EntryCollectionBuilder;
 import net.minecraftforge.common.ForgeConfigSpec;

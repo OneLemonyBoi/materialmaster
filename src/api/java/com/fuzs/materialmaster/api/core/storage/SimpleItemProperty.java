@@ -1,4 +1,4 @@
-package com.fuzs.materialmaster.core.storage;
+package com.fuzs.materialmaster.api.core.storage;
 
 import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;
 import net.minecraft.item.Item;

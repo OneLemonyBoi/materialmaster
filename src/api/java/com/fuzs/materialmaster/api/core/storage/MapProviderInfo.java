@@ -1,4 +1,4 @@
-package com.fuzs.materialmaster.core.storage;
+package com.fuzs.materialmaster.api.core.storage;
 
 import com.fuzs.materialmaster.api.builder.EntryCollectionBuilder;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -27,6 +27,7 @@ public class MapProviderInfo extends AbstractProviderInfo {
             // static field doesn't have an object associated with it
             this.field.set(null, this.builder.buildEntryMapWithCondition((List<String>) this.value.get(), (entry, value) -> value >= this.min && value <= this.max, "Out of bounds"));
         } catch (IllegalAccessException | ClassCastException ignored) {
+
         }
     }
 
