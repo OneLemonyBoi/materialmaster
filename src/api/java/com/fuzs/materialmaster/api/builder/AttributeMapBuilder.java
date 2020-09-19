@@ -1,7 +1,6 @@
 package com.fuzs.materialmaster.api.builder;
 
-import com.fuzs.materialmaster.MaterialMaster;
-import com.fuzs.materialmaster.common.handler.RegisterAttributeHandler;
+import com.fuzs.materialmaster.api.MaterialMasterReference;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -71,7 +70,7 @@ public class AttributeMapBuilder {
     private void putMultimapMap(Item item, IAttribute attribute, Double value) {
 
         UUID id = item instanceof ArmorItem ? this.armorModifierIds[((ArmorItem) item).getEquipmentSlot().getIndex()] : this.mainhandModifierId;
-        AttributeModifier modifier = new AttributeModifier(id, MaterialMaster.NAME + " modifier", value, AttributeModifier.Operation.ADDITION);
+        AttributeModifier modifier = new AttributeModifier(id, MaterialMasterReference.NAME + " modifier", value, AttributeModifier.Operation.ADDITION);
         this.putMultimapMap(item, attribute, modifier);
     }
 
@@ -149,7 +148,7 @@ public class AttributeMapBuilder {
 
     public AttributeMapBuilder putAttackReach(Item item, Double value) {
 
-        this.putMultimapMap(item, RegisterAttributeHandler.ATTACK_REACH, value);
+        this.putMultimapMap(item, MaterialMasterReference.ATTACK_REACH, value);
         return this;
     }
 

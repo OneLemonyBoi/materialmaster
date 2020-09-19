@@ -1,33 +1,26 @@
-package com.fuzs.materialmaster.core;
+package com.fuzs.materialmaster.api.core;
 
-import com.fuzs.materialmaster.MaterialMaster;
+import com.fuzs.materialmaster.api.core.storage.AttributeItemProperty;
+import com.fuzs.materialmaster.api.core.storage.ItemProperty;
+import com.fuzs.materialmaster.api.core.storage.SimpleItemProperty;
 import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;
-import com.fuzs.materialmaster.core.provider.ConfigPropertyProvider;
-import com.fuzs.materialmaster.core.storage.AttributeItemProperty;
-import com.fuzs.materialmaster.core.storage.ItemProperty;
-import com.fuzs.materialmaster.core.storage.SimpleItemProperty;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.minecraftforge.fml.config.ModConfig;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PropertySyncManager {
 
-    private static final PropertySyncManager INSTANCE = new PropertySyncManager(new ConfigPropertyProvider());
+    private static final PropertySyncManager INSTANCE = new PropertySyncManager();
 
     private final Map<AbstractPropertyProvider, String> providers = Maps.newHashMap();
     private final Map<PropertyType, ItemProperty<?>> properties = Maps.newHashMap();
-    private final AbstractPropertyProvider defaultProperties;
     private final Set<UUID> knownAttributeIds = Sets.newHashSet();
 
-    private PropertySyncManager(AbstractPropertyProvider defaultProperties) {
+    private PropertySyncManager() {
 
-        this.defaultProperties = defaultProperties;
         // removed precondition tests since new values might be set to no longer match them causing confusing errors to be logged
         this.properties.put(PropertyType.ATTRIBUTES, new AttributeItemProperty("Attributes", AbstractPropertyProvider::getAttributes));
         this.properties.put(PropertyType.STACK_SIZE, new SimpleItemProperty("Stack Size", AbstractPropertyProvider::getStackSize, 0.0, 64.0));
@@ -54,14 +47,12 @@ public class PropertySyncManager {
 
     private Map<AbstractPropertyProvider, String> getProviders() {
 
-        Map<AbstractPropertyProvider, String> providers = this.providers.entrySet().stream()
+        return this.providers.entrySet().stream()
                 .filter(entry -> entry.getKey().isEnabled())
+                .sorted(Comparator.comparingInt(entry -> entry.getKey().getPriority()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                         // use linked hash map so default properties are always applied last
                         (u, v) -> { throw new IllegalStateException(String.format("Duplicate key %s", u)); }, LinkedHashMap::new));
-        providers.put(this.defaultProperties, MaterialMaster.MODID);
-
-        return providers;
     }
 
     @SuppressWarnings("RedundantCast")
@@ -87,7 +78,7 @@ public class PropertySyncManager {
     }
 
     // config event handler
-    public void onModConfig(final ModConfig.ModConfigEvent evt) {
+    public void onModConfig(final ModConfig.Reloading evt) {
 
         if (this.getProviders().containsValue(evt.getConfig().getModId())) {
 

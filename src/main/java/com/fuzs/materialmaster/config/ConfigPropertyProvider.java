@@ -1,11 +1,11 @@
-package com.fuzs.materialmaster.core.provider;
+package com.fuzs.materialmaster.config;
 
-import com.fuzs.materialmaster.MaterialMaster;
+import com.fuzs.materialmaster.api.MaterialMasterReference;
 import com.fuzs.materialmaster.api.PropertyProviderUtils;
+import com.fuzs.materialmaster.api.SyncProvider;
 import com.fuzs.materialmaster.api.builder.AttributeMapBuilder;
 import com.fuzs.materialmaster.api.builder.EntryCollectionBuilder;
 import com.fuzs.materialmaster.api.provider.AbstractPropertyProvider;
-import com.fuzs.materialmaster.config.ConfigBuildHandler;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.item.Item;
@@ -13,6 +13,8 @@ import net.minecraft.item.Item;
 import java.util.Map;
 import java.util.UUID;
 
+@SuppressWarnings("unused")
+@SyncProvider
 public class ConfigPropertyProvider extends AbstractPropertyProvider {
 
     private final EntryCollectionBuilder<Item> entryBuilder = PropertyProviderUtils.createItemBuilder();
@@ -26,7 +28,13 @@ public class ConfigPropertyProvider extends AbstractPropertyProvider {
     @Override
     public String getName() {
 
-        return MaterialMaster.NAME;
+        return MaterialMasterReference.NAME;
+    }
+
+    @Override
+    public int getPriority() {
+
+        return 20;
     }
 
     @Override

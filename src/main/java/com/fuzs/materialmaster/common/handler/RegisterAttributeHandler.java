@@ -1,19 +1,15 @@
 package com.fuzs.materialmaster.common.handler;
 
-import com.fuzs.materialmaster.MaterialMaster;
+import com.fuzs.materialmaster.api.MaterialMasterReference;
 import com.fuzs.materialmaster.config.ConfigBuildHandler;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.IAttribute;
-import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class RegisterAttributeHandler {
-
-    public static final IAttribute ATTACK_REACH = new RangedAttribute(null,  MaterialMaster.MODID + ".attackReach", 5.0, ConfigBuildHandler.MIN_ATTACK_REACH.get(), ConfigBuildHandler.MAX_ATTACK_REACH.get()).setShouldWatch(true);
 
     public static final double REACH_DISTANCE_CREATIVE_BOOST = 0.5;
     public static final double ATTACK_REACH_CREATIVE_BOOST = 2.0;
@@ -26,7 +22,6 @@ public class RegisterAttributeHandler {
 
             PlayerEntity player = (PlayerEntity) evt.getEntity();
             player.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_KNOCKBACK);
-            player.getAttributes().registerAttribute(ATTACK_REACH);
         }
     }
 
@@ -50,7 +45,7 @@ public class RegisterAttributeHandler {
             player.getAttribute(LivingEntity.ENTITY_GRAVITY).setBaseValue(ConfigBuildHandler.DEFAULT_GRAVITY.get());
             // default value is for creative mode
             player.getAttribute(PlayerEntity.REACH_DISTANCE).setBaseValue(ConfigBuildHandler.DEFAULT_REACH_DISTANCE.get() + RegisterAttributeHandler.REACH_DISTANCE_CREATIVE_BOOST);
-            player.getAttribute(ATTACK_REACH).setBaseValue(ConfigBuildHandler.DEFAULT_ATTACK_REACH.get() + RegisterAttributeHandler.ATTACK_REACH_CREATIVE_BOOST);
+            player.getAttribute(MaterialMasterReference.ATTACK_REACH).setBaseValue(ConfigBuildHandler.DEFAULT_ATTACK_REACH.get() + RegisterAttributeHandler.ATTACK_REACH_CREATIVE_BOOST);
         }
     }
 

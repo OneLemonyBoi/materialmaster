@@ -1,7 +1,7 @@
 package com.fuzs.materialmaster.common.handler;
 
-import com.fuzs.materialmaster.core.PropertySyncManager;
-import com.fuzs.materialmaster.core.storage.SimpleItemProperty;
+import com.fuzs.materialmaster.api.core.PropertySyncManager;
+import com.fuzs.materialmaster.api.core.storage.SimpleItemProperty;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
