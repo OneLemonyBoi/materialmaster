@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -12,9 +13,9 @@ import java.util.function.Predicate;
 @SuppressWarnings("unused")
 public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends StringListParser<T> {
 
-    public EntryCollectionBuilder(IForgeRegistry<T> registry) {
+    public EntryCollectionBuilder(IForgeRegistry<T> registry, Logger logger) {
 
-        super(registry);
+        super(registry, logger);
     }
 
     /**
@@ -56,7 +57,7 @@ public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends St
                     }
                 } else {
 
-                    ENTRY_LOGGER.accept(source, message);
+                    this.logError(source, message);
                 }
             });
         }
@@ -90,7 +91,7 @@ public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends St
                     size = Optional.of(Double.parseDouble(s[1]));
                 } catch (NumberFormatException ignored) {
 
-                    ENTRY_LOGGER.accept(source, "Invalid number format");
+                    this.logError(source, "Invalid number format");
                 }
 
                 size.ifPresent(value -> entries.forEach(entry -> {
@@ -103,12 +104,12 @@ public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends St
                         }
                     } else {
 
-                        ENTRY_LOGGER.accept(source, message);
+                        this.logError(source, message);
                     }
                 }));
             } else {
 
-                ENTRY_LOGGER.accept(source, "Insufficient number of arguments");
+                this.logError(source, "Insufficient number of arguments");
             }
         }
 
