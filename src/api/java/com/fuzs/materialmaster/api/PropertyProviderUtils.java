@@ -57,42 +57,42 @@ public class PropertyProviderUtils {
 
     public static EntryCollectionBuilder<Block> createBlockBuilder() {
 
-        return new EntryCollectionBuilder<>(ForgeRegistries.BLOCKS);
+        return new EntryCollectionBuilder<>(ForgeRegistries.BLOCKS, MaterialMasterReference.LOGGER);
     }
 
     public static EntryCollectionBuilder<Fluid> createFluidBuilder() {
 
-        return new EntryCollectionBuilder<>(ForgeRegistries.FLUIDS);
+        return new EntryCollectionBuilder<>(ForgeRegistries.FLUIDS, MaterialMasterReference.LOGGER);
     }
 
     public static EntryCollectionBuilder<Item> createItemBuilder() {
 
-        return new EntryCollectionBuilder<>(ForgeRegistries.ITEMS);
+        return new EntryCollectionBuilder<>(ForgeRegistries.ITEMS, MaterialMasterReference.LOGGER);
     }
 
     public static EntryCollectionBuilder<Biome> createBiomeBuilder() {
 
-        return new EntryCollectionBuilder<>(ForgeRegistries.BIOMES);
+        return new EntryCollectionBuilder<>(ForgeRegistries.BIOMES, MaterialMasterReference.LOGGER);
     }
 
     public static EntryCollectionBuilder<Enchantment> createEnchantmentBuilder() {
 
-        return new EntryCollectionBuilder<>(ForgeRegistries.ENCHANTMENTS);
+        return new EntryCollectionBuilder<>(ForgeRegistries.ENCHANTMENTS, MaterialMasterReference.LOGGER);
     }
 
     public static EntryCollectionBuilder<Effect> createEffectBuilder() {
 
-        return new EntryCollectionBuilder<>(ForgeRegistries.POTIONS);
+        return new EntryCollectionBuilder<>(ForgeRegistries.POTIONS, MaterialMasterReference.LOGGER);
     }
 
     public static EntryCollectionBuilder<Potion> createPotionBuilder() {
 
-        return new EntryCollectionBuilder<>(ForgeRegistries.POTION_TYPES);
+        return new EntryCollectionBuilder<>(ForgeRegistries.POTION_TYPES, MaterialMasterReference.LOGGER);
     }
 
     public static EntryCollectionBuilder<EntityType<?>> createEntityBuilder() {
 
-        return new EntryCollectionBuilder<>(ForgeRegistries.ENTITIES);
+        return new EntryCollectionBuilder<>(ForgeRegistries.ENTITIES, MaterialMasterReference.LOGGER);
     }
 
 }

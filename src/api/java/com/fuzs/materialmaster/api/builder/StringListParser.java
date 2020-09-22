@@ -1,35 +1,32 @@
 package com.fuzs.materialmaster.api.builder;
 
-import com.fuzs.materialmaster.api.MaterialMasterReference;
 import com.google.common.collect.Lists;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class StringListParser<T extends IForgeRegistryEntry<T>> {
 
-    protected static final BiConsumer<String, String> ENTRY_LOGGER = (entry, message) -> MaterialMasterReference.LOGGER.error("Unable to parse entry \"{}\": {}", entry, message);
-
     private final IForgeRegistry<T> activeRegistry;
-    private final T defaultEntry;
+    private final Logger logger;
     
-    protected StringListParser(IForgeRegistry<T> registry) {
+    protected StringListParser(IForgeRegistry<T> registry, Logger logger) {
         
         this.activeRegistry = registry;
-        this.defaultEntry = registry.getValue(registry.getDefaultKey());
+        this.logger = logger;
     }
 
     protected final boolean checkOverwrite(boolean flag, String entry) {
 
         if (flag) {
 
-            ENTRY_LOGGER.accept(entry, "Already present");
+            this.logError(entry, "Already present");
         }
 
         return !flag;
@@ -66,19 +63,18 @@ public class StringListParser<T extends IForgeRegistryEntry<T>> {
                 break;
             default:
 
-                ENTRY_LOGGER.accept(source, "Invalid resource location format");
+                this.logError(source, "Invalid resource location format");
         }
     }
 
     private Optional<T> getEntryFromRegistry(ResourceLocation location) {
 
-        T entry = this.activeRegistry.getValue(location);
-        if (entry != null && (entry != this.defaultEntry || this.activeRegistry.containsValue(entry))) {
+        if (this.activeRegistry.containsKey(location)) {
 
-            return Optional.of(entry);
+            return Optional.ofNullable(this.activeRegistry.getValue(location));
         } else {
 
-            ENTRY_LOGGER.accept(location.toString(), "Entry not found");
+            this.logError(location.toString(), "Entry not found");
         }
 
         return Optional.empty();
@@ -93,10 +89,15 @@ public class StringListParser<T extends IForgeRegistryEntry<T>> {
 
         if (entries.isEmpty()) {
 
-            ENTRY_LOGGER.accept(namespace + ':' + path, "Entry not found");
+            this.logError(new ResourceLocation(namespace, path).toString(), "Entry not found");
         }
 
         return entries;
+    }
+    
+    protected void logError(String entry, String message) {
+
+        this.logger.error("Unable to parse entry \"{}\": {}", entry, message);
     }
     
 }
