@@ -1,244 +1,154 @@
 buildscript {
-
     repositories {
-
-        jcenter()
+        maven { url = 'https://maven.minecraftforge.net' }
         mavenCentral()
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        maven { url = 'https://repo.spongepowered.org/maven' }
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
     }
-
     dependencies {
-
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
-        classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
-
 apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'java-library'
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
+// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
-apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'maven-publish'
 
-version = "v${mod_version}-${mc_version}"
-group = "${mod_group}"
-archivesBaseName = "${mod_name.replaceAll("\\s", "")}"
-ext.version = "${mod_version}"
-ext.id = "${mod_id}"
-ext.name = "${mod_name}"
-ext.author = "${mod_author}"
-ext.description = "${mod_description}"
-ext.url = "${mod_url}"
-ext.loader = "${loader_version.replaceAll("\\..*", "")}"
-ext.forge = "${forge_version}"
-ext.mc = "${mc_version}"
+version = "${mod_version}"
+group = "onelemonyboi.${modid}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "${modid}"
 
-// Need this here so eclipse task generates correctly.
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
-
-configurations {
-
-    apiCompile.extendsFrom(compile)
-}
-
-sourceSets {
-
-    api
-    main
-    test
-}
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
 minecraft {
+    // The mappings can be changed at any time, and must be in the following format.
+    // snapshot_YYYYMMDD   Snapshot are built nightly.
+    // stable_#            Stables are built at the discretion of the MCP team.
+    // Use non-default mappings at your own risk. they may not always work.
+    // Simply re-run your setup task after changing the mappings to update your workspace.
+    mappings channel: "snapshot", version: "${mapping}-${mcp_version}"
+    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 
-    mappings channel: "${mcp_channel}", version: "${mcp_version}"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
+    // Default run configurations.
+    // These can be tweaked, removed, or duplicated as needed.
     runs {
-
         client {
-
+            property 'mixin.env.disableRefMap', 'true'
             workingDirectory project.file('run')
-            jvmArgs '-ea'
+            arg "-mixin.config="+archivesBaseName+".mixins.json"
+
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+
             mods {
-
                 materialmaster {
-
                     source sourceSets.main
-                    source sourceSets.api
                 }
             }
         }
 
         server {
-
+            property 'mixin.env.disableRefMap', 'true'
             workingDirectory project.file('run')
-            jvmArgs '-ea'
+            arg "-mixin.config="+archivesBaseName+".mixins.json"
+
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+
             mods {
-
                 materialmaster {
-
                     source sourceSets.main
-                    source sourceSets.api
                 }
             }
         }
-    }
 
+        data {
+            workingDirectory project.file('run')
+            //property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+            args '--mod', 'materialmaster', '--all', '--output', file('src/generated/resources/'), '--existing', sourceSets.main.resources.srcDirs[0]
+            mods {
+                materialmaster {
+                    source sourceSets.main
+                }
+            }
+        }
+
+    }
 }
 
-repositories {
+repositories{
+    maven {
+        // location of the maven that hosts JEI files
+        name = "Progwml6 maven"
+        url = "https://dvs1.progwml6.com/files/maven/"
+    }
+    maven {
+        // location of a maven mirror for JEI files, as a fallback
+        name = "ModMaven"
+        url = "https://modmaven.k-4u.nl"
+    }
+    jcenter()
+    mavenCentral()
 
-    mavenLocal()
-    // yarn mappings
-    maven { url = "https://maven.tterrag.com/" }
 }
 
 dependencies {
+    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
+    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
+    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
+    minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}" //21
 
-    minecraft "net.minecraftforge:forge:${project.mc}-${loader_version}"
-    implementation sourceSets.api.output
 }
 
-processResources {
-
-    // this will ensure that this task is redone when the versions change.
-    inputs.property "mod_id", project.id
-    inputs.property "mod_name", project.name
-    inputs.property "mod_version", project.ext.version
-    inputs.property "mod_url", project.url
-    inputs.property "mod_description", project.description
-    inputs.property "mod_author", project.author
-    inputs.property "loader_version", project.loader
-    inputs.property "forge_version", project.forge
-    inputs.property "mc_version", project.mc
-
-    // replace stuff in mods.toml and pack.mcmeta
-    from(sourceSets.main.resources.srcDirs) {
-
-        include 'META-INF/mods.toml', 'pack.mcmeta'
-        expand (
-
-                'mod_id': project.id,
-                'mod_name': project.name,
-                'mod_version': project.ext.version,
-                'mod_url': project.url,
-                'mod_description': project.description,
-                'mod_author': project.author,
-                'loader_version': project.loader,
-                'forge_version': project.forge,
-                'mc_version': project.mc
-        )
-    }
-
-    // copy everything else except mods.toml and pack.mcmeta
-    from(sourceSets.main.resources.srcDirs) {
-
-        exclude 'META-INF/mods.toml', 'pack.mcmeta'
-    }
+sourceSets {
+    main.resources.srcDirs += 'src/generated/resources'
 }
 
-ext.jarAttributes = [
-
-        "Specification-Title": project.id,
-        "Specification-Version": project.ext.version,
-        "Specification-Vendor": project.author.toLowerCase(),
-        "Implementation-Title": project.id,
-        "Implementation-Version": project.ext.version,
-        "Implementation-Vendor" : project.author.toLowerCase(),
-        "Implementation-Vendor-Id" : project.group,
-        "Implementation-URL" : project.url,
-        "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-]
-
-def createJarTask(def name, def type, def sources) {
-
-    return tasks.create(name, Jar) {
-
-        from sources
-        classifier = type
-
-        manifest { attributes(project.jarAttributes) }
-        exclude '**/.unused'
-        dependsOn classes
-        group 'jar'
-    }
-}
-
-def createSignJarTask(def name, def jarTask) {
-
-    return tasks.create(name, net.minecraftforge.gradle.common.task.SignJar) {
-
-        onlyIf {
-
-            project.hasProperty('keyStore')
-        }
-
-        keyStore = project.findProperty('keyStore')
-        alias = project.findProperty('alias')
-        storePass = project.findProperty('storePass')
-        keyPass = project.findProperty('keyPass')
-        inputFile = jarTask.archivePath
-        outputFile = jarTask.archivePath
-        dependsOn jarTask
-        group 'jar'
-    }
-}
-
+// Example for how to get properties into the manifest for reading by the runtime..
 jar {
-
-    from sourceSets.main.output.classesDirs
-    from sourceSets.api.output.classesDirs
-    from sourceSets.main.output.resourcesDir
-    from sourceSets.api.output.resourcesDir
-
-    manifest { attributes(project.jarAttributes) }
-    exclude '**/.unused'
-    group 'jar'
+    manifest {
+        attributes([
+                "Specification-Title": "${modid}",
+                "Specification-Vendor": "onelemonyboi",
+                "Specification-Version": "1", // We are version 1 of ourselves
+                "Implementation-Title": project.name,
+                "Implementation-Version": "${version}",
+                "Implementation-Vendor" :"onelemonyboi",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "MixinConfigs": "${modid}.mixins.json"
+        ])
+    }
 }
 
-createJarTask("deobfJar", "deobf", [sourceSets.main.output, sourceSets.api.output])
-createJarTask("sourceJar", "sources", [sourceSets.main.allSource, sourceSets.api.allSource])
-createJarTask("apiJar", "api", [sourceSets.api.output, sourceSets.api.allJava])
-createJarTask("javadocJar", "javadoc", javadoc)
-
-createSignJarTask("signJar", jar)
-createSignJarTask("signDeobfJar", deobfJar)
-createSignJarTask("signSourceJar", sourceJar)
-createSignJarTask("signApiJar", apiJar)
-createSignJarTask("signJavadocJar", javadocJar)
-
-// finalize all jar build tasks with a signing task
-def jarTasks = tasks.findAll { task -> !task.name.startsWith('sign') && task.name.toLowerCase().contains("jar")}
-jarTasks.each { task -> task.finalizedBy tasks.getByPath("sign" + task.name.substring(0, 1).toUpperCase() + task.name.substring(1))}
-
-artifacts {
-
-//    archives deobfJar
-    archives sourceJar
-    archives apiJar
-    archives javadocJar
+// Example configuration to allow publishing using the maven-publish task
+// we define a custom artifact that is sourced from the reobfJar output task
+// and then declare that to be published
+// Note you'll need to add a repository here
+def reobfFile = file("$buildDir/reobfJar/output.jar")
+def reobfArtifact = artifacts.add('default', reobfFile) {
+    type 'jar'
+    builtBy 'reobfJar'
 }
-
 publishing {
-
     publications {
-
-        mavenJava (MavenPublication) {
-
-//            artifact deobfJar
-            artifact sourceJar
-            artifact apiJar
-            artifact javadocJar
-            from components.java
+        mavenJava(MavenPublication) {
+            artifact reobfArtifact
+        }
+    }
+    repositories {
+        maven {
+            url "file:///${project.projectDir}/mcmodsrepo"
         }
     }
 }
 
-signing { sign publishing.publications.mavenJava }
+apply plugin: 'org.spongepowered.mixin'
 
-// general signing task runs before sources jar is signed otherwise
-signMavenJavaPublication.dependsOn signSourceJar
-// jar is otherwise signed before reobfuscating
-build.finalizedBy signJar
+mixin {
+    add sourceSets.main, "${modid}.refmap.json"
+}
